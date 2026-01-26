@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: coindash-web
+    env: static
+    buildCommand: ./render-build.sh
+    staticPublishPath: build/web

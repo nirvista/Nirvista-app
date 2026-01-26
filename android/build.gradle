@@ -1,0 +1,35 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    configurations.all {
+        resolutionStrategy {
+            // Keep core libraries new enough for Flutter's IME calls (fixes setStylusHandwritingEnabled crash on older devices).
+            force 'androidx.core:core:1.13.1'
+            force 'androidx.core:core-ktx:1.13.1'
+            force 'androidx.browser:browser:1.6.0'
+        }
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,3 @@
+ = 'C:\Users\Rohan\.codex\tmp\path\codex-arg0mc9Oca;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files\Java\jdk-23\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\MinGW\bin;C:\Program Files\WireGuard\;C:\Program Files\GitHub CLI\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Users\Rohan\AppData\Local\nvm;C:\nvm4w\nodejs;C:\flutter\bin;C:\Android\cmdline-tools\latest\bin;C:\Android\platform-tools';
+ = [Environment]::GetEnvironmentVariable('Path','Machine');
+[Environment]::SetEnvironmentVariable('Path', ";", 'Process');
