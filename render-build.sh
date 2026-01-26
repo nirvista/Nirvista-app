@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
-if ! command -v flutter >/dev/null; then
-  git clone https://github.com/flutter/flutter.git -b stable --depth 1
-  export PATH="$PWD/flutter/bin:$PATH"
-fi
+# Install Flutter (stable) into the Render build environment
+git clone https://github.com/flutter/flutter.git --depth 1 -b stable
+export PATH="$PWD/flutter/bin:$PATH"
 
 flutter --version
 flutter pub get
-flutter build web --release --web-renderer html
+flutter build web --release
+
+# SPA routing fix (important if you use Navigator routes like /home, /settings)
+# Create a redirect rule so refreshing pages works.
+echo "/*    /index.html   200" > build/web/_redirects
