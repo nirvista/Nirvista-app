@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../../ConstData/colorfile.dart';
 import '../../ConstData/colorprovider.dart';
 import '../../ConstData/typography.dart';
-import '../../commonwidgets/applogo.dart';
+import '../../CommonWidgets/applogo.dart';
 
 
 class GetHelp extends StatefulWidget {
