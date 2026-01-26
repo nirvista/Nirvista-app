@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const baseUrl = "https://nirv-ico.onrender.com";
+  static const baseUrl = "https://nirvista-backend-n8io.onrender.com";
   // Default bearer token used when no in-app session token is available.
   static const String defaultBearerToken = "<JWT>";
 
