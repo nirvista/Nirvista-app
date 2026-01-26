@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: coindash-web
+    name: nirvista-web
     env: static
     buildCommand: ./render-build.sh
     staticPublishPath: build/web
