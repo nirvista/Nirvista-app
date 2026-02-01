@@ -47,6 +47,7 @@ class AppTranslations extends Translations {
       'Sign Up': 'Sign Up',
       'Sign In': 'Sign In',
       'Privacy Policy': 'Privacy Policy',
+      'Terms & Conditions': 'Terms & Conditions',
       'Copyright 2023': 'Copyright 2023',
       'Speady, Easy and Fast': 'Speady, Easy and Fast',
       'Nirvista helps you set saving goals, earn cashback rewards, and get paychecks up to two days early. Get a \$20 bonus when you receive qualifying direct deposits.': 'Nirvista helps you set saving goals, earn cashback rewards, and get paychecks up to two days early. Get a \$20 bonus when you receive qualifying direct deposits.',

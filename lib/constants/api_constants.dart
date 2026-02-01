@@ -57,6 +57,14 @@ class ApiConstants {
   static const String icoSummary = '$baseUrl/api/ico/summary';
   static const String walletAnalytics = '$baseUrl/api/wallet/analytics';
   static const String icoBuy = '$baseUrl/api/ico/buy';
+  static const String walletStake = '$baseUrl/api/wallet/stake';
+  static const String walletStakes = '$baseUrl/api/wallet/stakes';
+
+  static String walletStakeWithdraw(String stakeId) =>
+      '$baseUrl/api/wallet/stakes/$stakeId/withdraw';
+
+  static String walletStakeClaim(String stakeId) =>
+      '$baseUrl/api/wallet/stakes/$stakeId/claim';
 
   // ICO
   static const String icoStages = '$baseUrl/api/ico/stages';

@@ -90,8 +90,6 @@ class _AnalyticsState extends State<Analytics> {
           const SizedBox(height: 16),
           _overviewRow(wallets),
           const SizedBox(height: 16),
-          _secondaryRow(wallets),
-          const SizedBox(height: 16),
           _bottomRow(portfolio, activity),
           const SizedBox(height: 16),
           _staticSlider(),
@@ -239,16 +237,6 @@ class _AnalyticsState extends State<Analytics> {
     );
   }
 
-  Widget _secondaryRow(Map<String, dynamic> wallets) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _stakingCard(wallets['staking'] as Map<String, dynamic>?),
-      ],
-    );
-  }
-
   Widget _bottomRow(Map<String, dynamic> portfolio, Map<String, dynamic> activity) {
     return LayoutBuilder(builder: (context, constraints) {
       final isNarrow = constraints.maxWidth < 900;
@@ -291,25 +279,6 @@ class _AnalyticsState extends State<Analytics> {
           if (credited != null) _labelValue("Total Credited", _formatAmount(currency ?? "INR", credited)),
           if (debited != null) _labelValue("Total Debited", _formatAmount(currency ?? "INR", debited)),
           if (totalEarned != null) _labelValue("Total Earned", _formatAmount(currency ?? "INR", totalEarned)),
-        ],
-      ),
-    );
-  }
-
-  Widget _stakingCard(Map<String, dynamic>? staking) {
-    final staked = (staking?['staked'] as num?)?.toDouble();
-    final expected = (staking?['expectedReturn'] as num?)?.toDouble();
-    final rate = staking?['interestRate']?.toString();
-    return _card(
-      title: "Staking",
-      icon: "assets/images/coin-convert.svg",
-      accent: const Color(0xff0CAF60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _labelValue("Staked", staked?.toString() ?? "-"),
-          _labelValue("Expected Return", expected?.toString() ?? "-"),
-          _labelValue("Interest Rate", rate != null ? "$rate%" : "-"),
         ],
       ),
     );

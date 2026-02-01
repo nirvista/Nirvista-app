@@ -1,6 +1,6 @@
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use, uri_does_not_exist
 import 'dart:js' as js;
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use, uri_does_not_exist
 import 'dart:js_util' as js_util;
 
 class RazorpayBridge {
@@ -20,10 +20,11 @@ class RazorpayBridge {
       js_util.setProperty(jsOptions, key, value);
     });
 
-    js_util.setProperty(
-      jsOptions,
-      'handler',
-      js.allowInterop((response) {
+      js_util.setProperty(
+        jsOptions,
+        'handler',
+        // ignore: undefined_function
+        js.allowInterop((response) {
         final data = <String, dynamic>{};
         if (response != null) {
           final paymentId =
@@ -49,6 +50,7 @@ class RazorpayBridge {
       js_util.setProperty(
         modal,
         'ondismiss',
+        // ignore: undefined_function
         js.allowInterop(() {
           onDismiss();
         }),
@@ -70,6 +72,7 @@ class RazorpayBridge {
     if (onError != null) {
       js_util.callMethod(instance, 'on', [
         'payment.failed',
+        // ignore: undefined_function
         js.allowInterop((response) {
           final errorData = <String, dynamic>{};
           final error = response != null

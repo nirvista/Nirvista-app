@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:nirvista/screens/drawerpagess/analytics.dart';
-import '../screens/drawerpagess/staking.dart';
 import '../screens/drawerpagess/dashboard.dart';
 import '../screens/drawerpagess/gethelp.dart';
 import '../screens/drawerpagess/chatscreenpages/messages.dart';
@@ -53,7 +52,6 @@ class DrawerControllerr extends GetxController implements GetxService{
     const Transactions(),
     const Messages(),
     const MyWallets(),
-    const StakingScreen(),
     const Analytics(),
     const GetHelp(),
     const Settings(),
@@ -66,7 +64,6 @@ class DrawerControllerr extends GetxController implements GetxService{
     'Transaction Details',
     'Messages',
     'Your Portfolio',
-    'Staking',
     'Buy Token',
     'Bank Deposit',
     'Sell Token',
@@ -83,6 +80,7 @@ class DrawerControllerr extends GetxController implements GetxService{
     'Privacy Pages',
     'Bank Details',
     'Withdraw Funds',
+    'Token Stacking',
   ];
 
 

@@ -6,7 +6,9 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
+import '../models/payu_session.dart';
 import '../screens/drawercode.dart';
+import '../screens/payments/payu_payment_webview.dart';
 import '../services/auth_api_service.dart';
 import '../services/razorpay_bridge.dart';
 import '../constants/api_constants.dart';
@@ -30,7 +32,10 @@ class MyWalletsController extends GetxController implements GetxService {
   bool isTopupLoading = false;
   bool isVerifyLoading = false;
   bool isSwapLoading = false;
-  int selectedTopupMethod = 1;
+  static const int topupMethodPhonePe = 0;
+  static const int topupMethodRazorpay = 1;
+  static const int topupMethodPayU = 2;
+  int selectedTopupMethod = topupMethodRazorpay;
   String? topupError;
   String? topupSuccess;
   String? verifyError;
@@ -94,8 +99,7 @@ class MyWalletsController extends GetxController implements GetxService {
   }
 
   setTopupMethod(int value) {
-    selectedTopupMethod =
-        value; // 1 = Razorpay (other values preserved for future)
+    selectedTopupMethod = value; // 0=PhonePe, 1=Razorpay, 2=PayU
     topupError = null;
     topupSuccess = null;
     verifyError = null;
@@ -299,7 +303,7 @@ class MyWalletsController extends GetxController implements GetxService {
     isTopupLoading = true;
     update();
     try {
-      if (selectedTopupMethod == 0) {
+      if (selectedTopupMethod == topupMethodPhonePe) {
         // PhonePe
         final uid = await _ensureUserId();
         if (uid == null || uid.isEmpty) {
@@ -313,7 +317,7 @@ class MyWalletsController extends GetxController implements GetxService {
           host: ApiConstants.baseUrl,
         );
         await _handleWalletTopupResponse(res, gateway: 'phonepe');
-      } else if (selectedTopupMethod == 1) {
+      } else if (selectedTopupMethod == topupMethodRazorpay) {
         // Razorpay receipts must be <= 40 chars.
         final receiptId =
             'rzp_${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}';
@@ -325,6 +329,12 @@ class MyWalletsController extends GetxController implements GetxService {
           receipt: receiptId,
         );
         await _handleWalletTopupResponse(res, gateway: 'razorpay');
+      } else if (selectedTopupMethod == topupMethodPayU) {
+        final res = await AuthApiService.initiateWalletTopup(
+          amount: amount,
+          paymentMethod: 'payu',
+        );
+        await _handleWalletTopupResponse(res, gateway: 'payu');
       } else {
         topupError = 'Invalid payment method selected.';
       }
@@ -464,6 +474,31 @@ class MyWalletsController extends GetxController implements GetxService {
               response['message']?.toString() ??
               'Razorpay order details are missing.';
         }
+      } else if (inferredGateway == 'payu') {
+        final Map<String, dynamic>? sessionMap =
+            _findPayUSessionMap(payload, asMap);
+        if (sessionMap == null) {
+          topupError = 'PayU session data is missing.';
+          update();
+          return;
+        }
+        PayUSession session;
+        try {
+          session = PayUSession.fromMap(sessionMap);
+        } catch (e) {
+          topupError = 'PayU session is invalid: ${e.toString()}';
+          update();
+          return;
+        }
+        topupSuccess = 'Opening PayU payment window...';
+        update();
+        final result = await _openPayUPaymentWindow(session);
+        final success = result == true;
+        final message = success
+            ? 'PayU payment completed. Thank you!'
+            : 'PayU payment was not completed.';
+        await _handlePaymentResult(success: success, message: message);
+        return;
       } else {
         topupSuccess = payload['message']?.toString() ??
             response['message']?.toString() ??
@@ -681,6 +716,45 @@ class MyWalletsController extends GetxController implements GetxService {
       topupError = 'Error opening Razorpay: ${e.toString()}';
       update();
     }
+  }
+
+  Future<bool?> _openPayUPaymentWindow(PayUSession session) async {
+    try {
+      return await Get.to<bool>(
+        () => PayUPaymentWebView(session: session),
+        fullscreenDialog: true,
+      );
+    } catch (e) {
+      topupError = 'Could not open PayU payment window. ${e.toString()}';
+      update();
+      return null;
+    }
+  }
+
+  Map<String, dynamic>? _findPayUSessionMap(
+      dynamic source, Map<String, dynamic> Function(dynamic) asMap) {
+    final candidate = asMap(source);
+    if (candidate.isNotEmpty && candidate.containsKey('endpoint')) {
+      return candidate;
+    }
+
+    for (final value in candidate.values) {
+      final found = _findPayUSessionMap(value, asMap);
+      if (found != null) {
+        return found;
+      }
+    }
+
+    if (source is Iterable) {
+      for (final item in source) {
+        final found = _findPayUSessionMap(item, asMap);
+        if (found != null) {
+          return found;
+        }
+      }
+    }
+
+    return null;
   }
 
   void _handleRazorpayWebSuccess(Map<String, dynamic> response) async {

@@ -124,10 +124,14 @@ class SingInController extends GetxController implements GetxService {
     update();
 
     try {
-      // Call API to send OTP for login
+      final normalizedPhone = '$selectedCountryCode$trimmedPhone';
+      final stopwatch = Stopwatch()..start();
       final response = await AuthApiService.loginOtpInit(
-        mobile: trimmedPhone,
+        mobile: normalizedPhone,
       );
+      stopwatch.stop();
+      debugPrint(
+          'Login OTP request for $normalizedPhone took ${stopwatch.elapsedMilliseconds}ms');
 
       if (response['success']) {
         // OTP sent successfully
@@ -167,10 +171,11 @@ class SingInController extends GetxController implements GetxService {
 
     try {
       final trimmedPhone = phoneNumber.trim();
+      final normalizedPhone = '$selectedCountryCode$trimmedPhone';
 
       // Verify OTP via API
       final response = await AuthApiService.loginOtpVerify(
-        mobile: trimmedPhone,
+        mobile: normalizedPhone,
         otp: trimmedOtp,
       );
 

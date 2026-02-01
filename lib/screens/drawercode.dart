@@ -229,6 +229,16 @@ class _DrawerCodeState extends State<DrawerCode> {
                         const SizedBox(
                           height: 12,
                         ),
+                        _buildListTile(
+                          title: "Token Stacking",
+                          icon: "assets/images/wallet.svg",
+                          index: 21,
+                          ontap: () {
+                            Navigator.pushNamed(context, '/stacking');
+                            contoller.colorSelecter(value: 21);
+                            contoller.function(value: -1);
+                          },
+                        ),
                         const SizedBox(
                           height: 12,
                         ),
@@ -481,6 +491,15 @@ class _DrawerCodeState extends State<DrawerCode> {
                                       ),
                                     ),
                                   ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 25, right: 16, bottom: 12),
+                                child: Text(
+                                  "Made with Love",
+                                  style: Typographyy.bodySmallMedium
+                                      .copyWith(color: notifire.getGry500_600Color),
                                 ),
                               ),
                             ],

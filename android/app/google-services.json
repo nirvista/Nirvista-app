@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "882083024650",
+    "project_id": "nirvista-63cce",
+    "storage_bucket": "nirvista-63cce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882083024650:android:b469175fa27bc58eeab4f3",
+        "android_client_info": {
+          "package_name": "com.company.nirvista"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL-8zLKJg0xYRfQVq8KLB12WMIZzXJgZE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

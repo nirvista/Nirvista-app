@@ -1,11 +1,16 @@
 // ignore_for_file: deprecated_member_use
 //import 'package:nirvista/screens/authscreens/singin.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../CommonWidgets/applogo.dart';
 import '../../CommonWidgets/bottombar.dart';
+import '../drawerpagess/termsandcondition/policy_detail.dart';
 //import '../../CommonWidgets/comuntextfilde.dart';
 import '../../ConstData/colorfile.dart';
 import '../../ConstData/colorprovider.dart';
@@ -23,6 +28,28 @@ class SingUpScreen extends StatefulWidget {
 class _SingUpScreenState extends State<SingUpScreen> {
   ColorNotifire notifire = ColorNotifire();
   SingUpController singUpController = Get.put(SingUpController());
+  late final TapGestureRecognizer _termsRecognizer;
+  @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = _openTermsAndConditions;
+  }
+
+  Future<void> _openTermsAndConditions() async {
+    const policyTitle = 'TERMS & CONDITIONS';
+    if (kIsWeb) {
+      final uri =
+          Uri.base.resolve('/policy/${Uri.encodeComponent(policyTitle)}');
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const PolicyDetailScreen(policyTitle: policyTitle),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     notifire = Provider.of<ColorNotifire>(context, listen: true);
@@ -380,7 +407,8 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                 style: Typographyy.bodyMediumMedium.copyWith(
                                     color: notifire.getGry500_600Color)),
                             TextSpan(
-                                text: " Privacy Policy, ".tr,
+                                text: '${"Terms & Conditions".tr}, ',
+                                recognizer: _termsRecognizer,
                                 style: Typographyy.bodyMediumSemiBold
                                     .copyWith(color: notifire.getWhitAndBlack)),
                             TextSpan(
@@ -482,5 +510,11 @@ class _SingUpScreenState extends State<SingUpScreen> {
         // color: Colors.deepPurple,
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _termsRecognizer.dispose();
+    super.dispose();
   }
 }

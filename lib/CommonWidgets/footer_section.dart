@@ -13,7 +13,7 @@ class FooterSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
       child: Text(
-        'Made with ❤️ By Nirvista',
+        'Made with love by Nirvista',
         style: Typographyy.bodySmallMedium.copyWith(
           color: notifire.getTextColor.withOpacity(0.8),
         ),

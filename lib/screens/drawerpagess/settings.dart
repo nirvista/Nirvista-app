@@ -301,44 +301,74 @@ class _SettingsState extends State<Settings> {
               .copyWith(color: notifire.getGry500_600Color),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _copyReferral(shareValue),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: priMeryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: notifire.getContainerColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: priMeryColor.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.link, color: priMeryColor, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SelectableText(
+                      shareValue,
+                      maxLines: 2,
+                      style: Typographyy.bodyMediumMedium
+                          .copyWith(color: notifire.getTextColor),
+                    ),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                ),
-                icon: const Icon(Icons.copy, size: 18),
-                label: Text("Copy link".tr,
-                    style: Typographyy.bodyMediumSemiBold
-                        .copyWith(color: Colors.white)),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _shareReferral(shareValue),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: notifire.getGry700_300Color,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _copyReferral(shareValue),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: priMeryColor),
+                        foregroundColor: priMeryColor,
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.copy, size: 18),
+                      label: Text("Copy link".tr,
+                          style: Typographyy.bodyMediumSemiBold
+                              .copyWith(color: priMeryColor)),
+                    ),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                ),
-                icon: const Icon(Icons.share, size: 18),
-                label: Text("Share link".tr,
-                    style: Typographyy.bodyMediumSemiBold
-                        .copyWith(color: notifire.getTextColor)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _shareReferral(shareValue),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: notifire.getGry700_300Color,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      icon: const Icon(Icons.share, size: 18),
+                      label: Text("Share link".tr,
+                          style: Typographyy.bodyMediumSemiBold
+                              .copyWith(color: notifire.getTextColor)),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (linkValue != null) ...[
           const SizedBox(height: 8),
@@ -1379,12 +1409,6 @@ class _SettingsState extends State<Settings> {
                               ? wallets['rewards']
                               : null),
                         ),
-                        _detailRow(
-                          label: "Staking Balance",
-                          value: _stringValue(wallets is Map<String, dynamic>
-                              ? wallets['staking']
-                              : null),
-                        ),
                       ],
                     ),
                   ),
@@ -1552,8 +1576,6 @@ class _SettingsState extends State<Settings> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildReferralShareRow(code),
-                  const SizedBox(height: 8),
                   const Divider(),
                   const SizedBox(height: 16),
                   const SizedBox(height: 12),

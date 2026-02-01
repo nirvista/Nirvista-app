@@ -2122,10 +2122,17 @@ Future<void> sendMoney({required double width, context}) async {
           ),
           const SizedBox(height: 16),
           buildMethodCard(
-            value: 1,
+            value: MyWalletsController.topupMethodRazorpay,
             title: "Razorpay",
             subtitle: "Cards / UPI / Wallets",
             icon: Icons.payment,
+          ),
+          SizedBox(height: isCompact ? 12 : 16),
+          buildMethodCard(
+            value: MyWalletsController.topupMethodPayU,
+            title: "PayU",
+            subtitle: "Cards, UPI & wallets via PayU",
+            icon: Icons.account_balance_wallet,
           ),
           SizedBox(height: isCompact ? 16 : 24),
           TextField(
@@ -2472,10 +2479,17 @@ Future<void> sendMoney({required double width, context}) async {
                                 ),
                                 const SizedBox(height: 16),
                                 buildMethodCard(
-                                  value: 1,
+                                  value: MyWalletsController.topupMethodRazorpay,
                                   title: "Razorpay",
                                   subtitle: "Cards / UPI / Wallets",
                                   icon: Icons.payment,
+                                ),
+                                const SizedBox(height: 12),
+                                buildMethodCard(
+                                  value: MyWalletsController.topupMethodPayU,
+                                  title: "PayU",
+                                  subtitle: "Cards, UPI & wallets via PayU",
+                                  icon: Icons.account_balance_wallet,
                                 ),
                                 const SizedBox(height: 24),
                                 TextField(

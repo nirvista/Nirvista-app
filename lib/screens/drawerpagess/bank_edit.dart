@@ -297,10 +297,30 @@ class _BankEditPageState extends State<BankEditPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Edit Bank Details",
-                style:
-                    Typographyy.heading4.copyWith(color: notifire.getTextColor),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Edit Bank Details",
+                    style: Typographyy.heading4
+                        .copyWith(color: notifire.getTextColor),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: Icon(Icons.arrow_back,
+                        color: notifire.getTextColor, size: 18),
+                    label: Text(
+                      "Go Back",
+                      style: Typographyy.bodySmallMedium
+                          .copyWith(color: priMeryColor),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: const Size(120, 32),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               Text(

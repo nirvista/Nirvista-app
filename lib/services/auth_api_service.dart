@@ -654,34 +654,54 @@ class AuthApiService {
     return _decodeResponse(res);
   }
 
-  static Future<Map<String, dynamic>> startStaking({
+  static Future<Map<String, dynamic>> createStake({
     required double tokenAmount,
+    String stackType = 'fixed',
+    required int durationMonths,
   }) async {
     final headers = await _authHeaders();
     final res = await http.post(
-      Uri.parse('${ApiConstants.baseUrl}/api/wallet/stake'),
+      Uri.parse(ApiConstants.walletStake),
       headers: headers,
-      body: jsonEncode({"tokenAmount": tokenAmount}),
+      body: jsonEncode({
+        "tokenAmount": tokenAmount,
+        "stackType": stackType,
+        "durationMonths": durationMonths,
+      }),
     );
     return _decodeResponse(res);
   }
 
-  static Future<Map<String, dynamic>> listStakes({
+  static Future<Map<String, dynamic>> getWalletStakes({
     int limit = 100,
   }) async {
     final headers = await _authHeaders();
-    final res = await http.get(
-      Uri.parse('${ApiConstants.baseUrl}/api/wallet/stakes?limit=$limit'),
+    final safeLimit = limit.clamp(1, 200);
+    final uri = Uri.parse('${ApiConstants.walletStakes}?limit=$safeLimit');
+    final res = await http.get(uri, headers: headers);
+    return _decodeResponse(res);
+  }
+
+  static Future<Map<String, dynamic>> withdrawStake({
+    required String stakeId,
+  }) async {
+    final headers = await _authHeaders();
+    final res = await http.post(
+      Uri.parse(ApiConstants.walletStakeWithdraw(stakeId)),
       headers: headers,
+      body: jsonEncode({}),
     );
     return _decodeResponse(res);
   }
 
-  static Future<Map<String, dynamic>> claimStake(String stakeId) async {
+  static Future<Map<String, dynamic>> claimStake({
+    required String stakeId,
+  }) async {
     final headers = await _authHeaders();
     final res = await http.post(
-      Uri.parse('${ApiConstants.baseUrl}/api/wallet/stakes/$stakeId/claim'),
+      Uri.parse(ApiConstants.walletStakeClaim(stakeId)),
       headers: headers,
+      body: jsonEncode({}),
     );
     return _decodeResponse(res);
   }

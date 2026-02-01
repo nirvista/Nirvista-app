@@ -13,7 +13,6 @@ import 'drawerpagess/my_wallets.dart';
 import 'drawerpagess/recipients.dart';
 import 'drawerpagess/settings.dart';
 import 'drawerpagess/transactions.dart';
-import 'drawerpagess/staking.dart';
 import 'appbarcode.dart';
 import 'drawercode.dart';
 import 'drawerpagess/buycrypto/bankdeposit.dart';
@@ -45,7 +44,6 @@ class _HomePageState extends State<HomePage> {
     'messages': 2,
     'myWallets': 3,
     'transfer': 4,
-    'staking': 4,
     'creditCard': 5,
     'bankDeposit': 6,
     'sellCrypto': 7,
@@ -102,8 +100,6 @@ class _HomePageState extends State<HomePage> {
         return const MyWallets();
       case 'transfer':
         return const Transactions();
-      case 'staking':
-        return const StakingScreen();
       case 'creditCard':
         return const CreditCard();
       case 'bankDeposit':

@@ -10,7 +10,9 @@ import '../screens/homepage.dart';
 import '../screens/drawerpagess/bank_details_page.dart';
 import '../screens/drawerpagess/bank_edit.dart';
 import '../screens/drawerpagess/bank_edit_otp.dart';
+import '../screens/drawerpagess/termsandcondition/policy_detail.dart';
 import '../screens/drawerpagess/withdrawal.dart';
+import 'package:nirvista/screens/drawerpagess/token_stacking.dart';
 
 class Flurorouter {
 
@@ -51,6 +53,16 @@ static final Handler _signUpHandler = Handler(handlerFunc: (context, Map<String,
     return BankEditPage(otp: otpValue);
   });
   static final Handler _withdrawalHandler = Handler(handlerFunc: (context, Map<String, dynamic> params) => const WithdrawalPage());
+  static final Handler _policyHandler = Handler(
+    handlerFunc: (context, Map<String, dynamic> params) {
+      final title = params['title']?.first ?? 'TERMS & CONDITIONS';
+    return PolicyDetailScreen(
+      policyTitle: Uri.decodeComponent(title),
+    );
+  },
+);
+  static final Handler _stackingHandler =
+      Handler(handlerFunc: (context, Map<String, dynamic> params) => const TokenStackingPage());
 
   static void setupRouter(){
     router.define(
@@ -100,6 +112,16 @@ static final Handler _signUpHandler = Handler(handlerFunc: (context, Map<String,
     router.define(
       '/withdrawal',
       handler: _withdrawalHandler,
+      transitionType: TransitionType.fadeIn,
+    );
+    router.define(
+      '/policy/:title',
+      handler: _policyHandler,
+      transitionType: TransitionType.fadeIn,
+    );
+    router.define(
+      '/stacking',
+      handler: _stackingHandler,
       transitionType: TransitionType.fadeIn,
     );
     router.define(
