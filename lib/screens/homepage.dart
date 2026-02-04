@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage> {
     'settings': 17,
     'bankEdit': 19,
     'withdrawal': 20,
+    'stacking': DrawerControllerr.tokenStackingColorIndex,
   };
 
   void _syncPageTitleColor() {

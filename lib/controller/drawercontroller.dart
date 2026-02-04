@@ -12,9 +12,8 @@ import '../screens/drawerpagess/settings.dart';
 import '../screens/drawercode.dart';
 import '../screens/drawerpagess/transactions.dart';
 
-
-class DrawerControllerr extends GetxController implements GetxService{
-
+class DrawerControllerr extends GetxController implements GetxService {
+  static const int tokenStackingColorIndex = 20;
   int currentIndex = -1;
   int currentcolor = 0;
   RxInt index = 0.obs;
@@ -22,16 +21,16 @@ class DrawerControllerr extends GetxController implements GetxService{
   RxBool istrue = false.obs;
   int selectedTile = -1.obs;
 
-
   bool isRtl = false;
 
-  setRTL(bool value){
+  setRTL(bool value) {
     isRtl = value;
     update();
   }
+
   bool isLoading = false;
 
-  offIsLoading(context,double width){
+  offIsLoading(context, double width) {
     isLoading = true;
     update();
     Timer(const Duration(seconds: 2), () {
@@ -46,7 +45,6 @@ class DrawerControllerr extends GetxController implements GetxService{
     });
   }
 
-
   List page = [
     const Dashboard(),
     const Transactions(),
@@ -57,7 +55,6 @@ class DrawerControllerr extends GetxController implements GetxService{
     const Settings(),
     const GetHelp(),
   ].obs;
-
 
   List pageTitle = [
     'Dashboard',
@@ -83,39 +80,38 @@ class DrawerControllerr extends GetxController implements GetxService{
     'Token Stacking',
   ];
 
-
   bool isTransfer = false;
-  setIsTransfer(value){
+  setIsTransfer(value) {
     isTransfer = value;
     update();
-   }
+  }
 
+  bool isFrom = false;
 
-   bool isFrom = false;
-
-   setIsFrom(value){
-     isFrom = value;
-     update();
-   }
+  setIsFrom(value) {
+    isFrom = value;
+    update();
+  }
 
   bool isto = false;
 
-  setIsTo(value){
+  setIsTo(value) {
     isto = value;
     update();
   }
 
-bool isCoin = false;
-  setIsCoin(value){
+  bool isCoin = false;
+  setIsCoin(value) {
     isCoin = value;
     update();
   }
 
- int selectFrom = 0;
-  setSelectFrom(value){
+  int selectFrom = 0;
+  setSelectFrom(value) {
     selectFrom = value;
     update();
   }
+
   List from = [
     "Spot",
     "Margin",
@@ -125,10 +121,11 @@ bool isCoin = false;
   ];
 
   int selectTo = 0;
-  setSelectTo(value){
+  setSelectTo(value) {
     selectTo = value;
     update();
   }
+
   List to = [
     "COIN-M Futures",
     "USD-M Futures",
@@ -137,10 +134,11 @@ bool isCoin = false;
   ];
 
   int selectCoins = 0;
-  setSelectCoin(value){
+  setSelectCoin(value) {
     selectCoins = value;
     update();
   }
+
   List coins = [
     "Bitcoin",
     "Binance Coin",
@@ -149,15 +147,18 @@ bool isCoin = false;
     "Ethereum",
   ];
 
-
-
-  function({required int value}){
+  function({required int value}) {
     currentIndex = value;
     update();
   }
 
-  colorSelecter({required int value}){
-    currentcolor = value;
+  colorSelecter({required int value}) {
+    final maxIndex = pageTitle.length - 1;
+    if (maxIndex >= 0) {
+      currentcolor = value.clamp(0, maxIndex).toInt();
+    } else {
+      currentcolor = 0;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!isClosed) {
         update();

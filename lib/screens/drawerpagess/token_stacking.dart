@@ -54,7 +54,9 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
   @override
   void initState() {
     super.initState();
-    _drawerController.colorSelecter(value: 21);
+    _drawerController.colorSelecter(
+      value: DrawerControllerr.tokenStackingColorIndex,
+    );
     amountController.addListener(_syncAmount);
     _loadData();
   }
@@ -219,12 +221,12 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
               .map((entry) => entry.nextInterestCreditAt ?? entry.startDate)
               .whereType<DateTime>()
               .fold<DateTime?>(
-                null,
-                (prev, current) {
-                  if (prev == null) return current;
-                  return prev.isBefore(current) ? prev : current;
-                },
-              );
+            null,
+            (prev, current) {
+              if (prev == null) return current;
+              return prev.isBefore(current) ? prev : current;
+            },
+          );
         });
       }
     } catch (_) {
@@ -240,7 +242,8 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
   }
 
   double get _monthlyInterest =>
-      (amountToStack * (_planRateFor(selectedStackType, selectedDuration) ?? 0)) /
+      (amountToStack *
+          (_planRateFor(selectedStackType, selectedDuration) ?? 0)) /
       100;
 
   double get _totalEstimatedInterest =>
@@ -274,9 +277,8 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
                     ? 'Funds locked until maturity.'
                     : '1-month notice required.',
                 style: TextStyle(
-                  color: selectedStackType == 'fixed'
-                      ? Colors.red
-                      : Colors.blue,
+                  color:
+                      selectedStackType == 'fixed' ? Colors.red : Colors.blue,
                 ),
               ),
             ],
@@ -326,7 +328,8 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
         );
       }
     } catch (error) {
-      _showSnackBar('Failed to start stack. ${error.toString()}', isError: true);
+      _showSnackBar('Failed to start stack. ${error.toString()}',
+          isError: true);
     } finally {
       setState(() {
         isSubmitting = false;
@@ -340,8 +343,7 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
       processingWithdrawalId = stake.id;
     });
     try {
-      final response =
-          await AuthApiService.withdrawStake(stakeId: stake.id);
+      final response = await AuthApiService.withdrawStake(stakeId: stake.id);
       if (response['success'] == true) {
         await _fetchStakes();
         _showSnackBar('Withdrawal notice requested.');
@@ -461,12 +463,11 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
   }
 
   String _formatTokens(double value) {
-    final formatted = value % 1 == 0
-        ? value.toStringAsFixed(0)
-        : value.toStringAsFixed(2);
+    final formatted =
+        value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
     final parts = formatted.split('.');
-    final withCommas = parts[0].replaceAllMapped(
-        RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',');
+    final withCommas = parts[0]
+        .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',');
     return '$withCommas${parts.length > 1 ? '.${parts[1]}' : ''}';
   }
 
@@ -501,53 +502,17 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
   Widget _buildSummaryActions() {
     return Row(
       children: [
-        ElevatedButton(
-          style: _summaryWithdrawButtonStyle,
-          onPressed: availableRewards > 0
-              ? () => _showSnackBar('Reward withdraw feature coming soon.')
-              : null,
-          child: Text(
-            'Withdraw Rewards',
-            style: Typographyy.bodyMediumMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(width: 14),
         Expanded(
-          child: Ink(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF2CD6C1),
-                  Color(0xFF0BB4A6),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: Colors.white.withOpacity(0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 6),
-                  blurRadius: 30,
-                ),
-              ],
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(32),
-              onTap: _focusAmountInput,
-              child: Container(
-                height: 52,
-                alignment: Alignment.center,
-                child: Text(
-                  'Start New Stack',
-                  style: Typographyy.bodyLargeMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+          child: ElevatedButton(
+            style: _summaryWithdrawButtonStyle,
+            onPressed: availableRewards > 0
+                ? () => _showSnackBar('Reward withdraw feature coming soon.')
+                : null,
+            child: Text(
+              'Withdraw Rewards',
+              style: Typographyy.bodyMediumMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: priMeryColor,
               ),
             ),
           ),
@@ -558,18 +523,36 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
 
   ButtonStyle get _summaryWithdrawButtonStyle {
     return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFF6C25F),
-      foregroundColor: Colors.black,
-      disabledBackgroundColor: const Color(0xFFF6C25F).withOpacity(0.5),
-      disabledForegroundColor: Colors.black.withOpacity(0.5),
+      backgroundColor: Colors.white,
+      foregroundColor: priMeryColor,
+      disabledBackgroundColor: Colors.white.withOpacity(0.8),
+      disabledForegroundColor: priMeryColor.withOpacity(0.35),
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 28),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
+        side: BorderSide(color: priMeryColor.withOpacity(0.2)),
       ),
-      elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.25),
+      elevation: 2,
+      shadowColor: priMeryColor.withOpacity(0.2),
     ).copyWith(
-      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.35)),
+      overlayColor: MaterialStateProperty.all(priMeryColor.withOpacity(0.1)),
+    );
+  }
+
+  ButtonStyle get _planStartButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.white,
+      foregroundColor: priMeryColor,
+      disabledBackgroundColor: Colors.white.withOpacity(0.7),
+      disabledForegroundColor: priMeryColor.withOpacity(0.35),
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      elevation: 5,
+      shadowColor: priMeryColor.withOpacity(0.25),
+    ).copyWith(
+      overlayColor: MaterialStateProperty.all(priMeryColor.withOpacity(0.12)),
     );
   }
 
@@ -589,17 +572,15 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
             if (apiError != null) _buildErrorBanner(),
             _buildTopSummary(),
             const SizedBox(height: 24),
-            _buildSelectors(constraints.maxWidth < 900),
-            const SizedBox(height: 24),
+            _buildPlanOverview(constraints.maxWidth < 900),
+            const SizedBox(height: 16),
             _buildAmountSection(),
-            const SizedBox(height: 24),
-            _buildRules(),
-            const SizedBox(height: 12),
-            _buildAgreement(),
-            const SizedBox(height: 24),
-            _buildActions(),
+            const SizedBox(height: 16),
+            _buildConsentCTA(),
             const SizedBox(height: 32),
             _buildStacks(),
+            const SizedBox(height: 32),
+            _buildBenefitAndRulesSection(),
             const SizedBox(height: 32),
             _buildNotifications(),
           ],
@@ -721,283 +702,276 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
       },
     );
   }
- 
-  Widget _buildSelectors(bool isMobile) {
-    final stackTypeChooser = isMobile
+
+  Widget _buildPlanOverview(bool isMobile) {
+    final titleStyle = Typographyy.heading6.copyWith(
+      fontWeight: FontWeight.w700,
+      color: Colors.black87,
+    );
+    final tagStyle = Typographyy.bodySmallMedium.copyWith(
+      color: Colors.white70,
+      fontWeight: FontWeight.w600,
+    );
+    final header = Row(
+      children: [
+        Text('Stacking Plans', style: titleStyle),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: priMeryColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text('ICO', style: tagStyle),
+        ),
+      ],
+    );
+
+    final planWidgets = isMobile
         ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildStackTypeCard('fixed'),
-              const SizedBox(height: 12),
-              _buildStackTypeCard('fluid'),
+              _buildPlanCard(
+                type: 'fixed',
+                accentStart: const Color(0xFF2A6BCB),
+                accentEnd: const Color(0xFF0B2A6F),
+                icon: Icons.lock_clock,
+                title: 'Fixed Stack',
+                subtitle: 'Lock funds for predictable, higher yields.',
+              ),
+              const SizedBox(height: 16),
+              _buildPlanCard(
+                type: 'fluid',
+                accentStart: const Color(0xFF25D9BE),
+                accentEnd: const Color(0xFF0B5E52),
+                icon: Icons.autorenew,
+                title: 'Fluid Stack',
+                subtitle: 'Withdraw with notice for extra flexibility.',
+              ),
             ],
           )
         : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildStackTypeCard('fixed')),
-              const SizedBox(width: 12),
-              Expanded(child: _buildStackTypeCard('fluid')),
+              Expanded(
+                child: _buildPlanCard(
+                  type: 'fixed',
+                  accentStart: const Color(0xFF2A6BCB),
+                  accentEnd: const Color(0xFF0B2A6F),
+                  icon: Icons.lock_clock,
+                  title: 'Fixed Stack',
+                  subtitle: 'Lock funds for predictable, higher yields.',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPlanCard(
+                  type: 'fluid',
+                  accentStart: const Color(0xFF25D9BE),
+                  accentEnd: const Color(0xFF0B5E52),
+                  icon: Icons.autorenew,
+                  title: 'Fluid Stack',
+                  subtitle: 'Withdraw with notice for extra flexibility.',
+                ),
+              ),
             ],
           );
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            notifire.getContainerColor.withOpacity(0.95),
-            notifire.getContainerColor,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: notifire.getBorderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            offset: const Offset(0, 8),
-            blurRadius: 24,
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          stackTypeChooser,
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: durationOptions.map(_buildDurationChip).toList(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildReturnsPreview(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStackTypeCard(String type) {
-    final isFixed = type == 'fixed';
-    final isSelected = selectedStackType == type;
-    final accent = isFixed ? Colors.redAccent : Colors.blueAccent;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          selectedStackType = type;
-        });
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? accent.withOpacity(0.12)
-              : notifire.getContainerColor2,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? accent : notifire.getBorderColor,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  isFixed ? 'FIXED STACK' : 'FLUID STACK',
-                  style: Typographyy.bodyLargeMedium.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: notifire.getTextColor,
-                  ),
-                ),
-                const Spacer(),
-                if (isFixed)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'Recommended',
-                      style: Typographyy.bodySmallMedium.copyWith(
-                        fontSize: 10,
-                        color: Colors.orange.shade900,
-                      ),
-                    ),
-                  )
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isFixed ? 'Higher returns' : 'Flexible withdrawal',
-              style: Typographyy.bodyMediumMedium
-                  .copyWith(color: notifire.getGry600_500Color),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isFixed ? 'Locked until maturity' : '1-month notice required',
-              style: Typographyy.bodySmallRegular
-                  .copyWith(color: notifire.getGry500_600Color),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isSelected ? 'Selected' : 'Tap to select',
-              style: Typographyy.bodySmallRegular.copyWith(
-                color: isSelected ? accent : notifire.getGry500_600Color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDurationChip(int months) {
-    final isActive = selectedDuration == months;
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedDuration = months;
-          });
-        },
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          decoration: BoxDecoration(
-            color: isActive
-                ? priMeryColor.withOpacity(0.1)
-                : notifire.getContainerColor2,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isActive ? priMeryColor : notifire.getBorderColor,
-            ),
-          ),
-          child: Text(
-            '$months Months',
-            style: Typographyy.bodyLargeMedium.copyWith(
-              color: isActive ? priMeryColor : notifire.getTextColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReturnsPreview() {
-    final fluidRates = planRates['fluid'] ?? const {};
-    final fixedRates = planRates['fixed'] ?? const {};
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            notifire.getContainerColor.withOpacity(0.9),
-            notifire.getContainerColor,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: notifire.getBorderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 8),
-            blurRadius: 18,
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: _buildReturnColumn('Fluid Stack Returns', fluidRates),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildReturnColumn(
-              'Fixed Stack Returns',
-              fixedRates,
-              highlight24: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReturnColumn(String title, Map<int, double> rates,
-      {bool highlight24 = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Typographyy.heading6.copyWith(color: notifire.getTextColor),
+        header,
+        const SizedBox(height: 14),
+        _buildPlanStartButton(),
+        const SizedBox(height: 16),
+        planWidgets,
+      ],
+    );
+  }
+
+  Widget _buildPlanStartButton() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            style: _planStartButtonStyle,
+            onPressed: _focusAmountInput,
+            child: Text(
+              'Start New Stack',
+              style: Typographyy.bodyLargeMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: priMeryColor,
+              ),
+            ),
+          ),
         ),
-        const SizedBox(height: 12),
-        ...durationOptions.map((months) {
-          final rate = rates[months] ??
-              _planRateFor(title.contains('Fixed') ? 'fixed' : 'fluid', months) ??
-              0;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: notifire.getBorderColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$months mo',
-                        style: Typographyy.bodySmallRegular.copyWith(
-                            color: notifire.getTextColor),
-                      ),
-                    ),
-                    if (highlight24 && months == 24)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: Text(
-                          'Best return',
-                          style: Typographyy.bodySmallMedium
-                              .copyWith(color: priMeryColor),
-                        ),
-                      ),
-                  ],
+      ],
+    );
+  }
+
+  void _selectPlan(String type) {
+    final durations = planRates[type]?.keys.toList() ?? [];
+    setState(() {
+      selectedStackType = type;
+      if (!durations.contains(selectedDuration) && durations.isNotEmpty) {
+        selectedDuration = durations.first;
+      }
+    });
+  }
+
+  Widget _buildPlanCard({
+    required String type,
+    required Color accentStart,
+    required Color accentEnd,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    final isSelected = selectedStackType == type;
+    final rates = planRates[type]?.entries.toList() ?? [];
+    rates.sort((a, b) => a.key.compareTo(b.key));
+    final bestRate = rates.fold<double>(
+      0,
+      (prev, current) => current.value > prev ? current.value : prev,
+    );
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [accentStart, accentEnd],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: accentEnd.withOpacity(0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        border: Border.all(
+          color:
+              isSelected ? Colors.white.withOpacity(0.9) : Colors.transparent,
+          width: 1.4,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                child: Icon(icon, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Typographyy.heading6.copyWith(
+                      color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (isSelected)
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    '${rate.toStringAsFixed(1)}% / mo',
-                    style: Typographyy.bodyLargeMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: notifire.getTextColor,
-                    ),
+                    'Active',
+                    style: Typographyy.bodySmallMedium
+                        .copyWith(color: Colors.white),
                   ),
                 ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: Typographyy.bodyMediumMedium
+                .copyWith(color: Colors.white70, height: 1.3),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: rates
+                .map(
+                  (entry) => Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.16),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${entry.key}M • ${entry.value.toStringAsFixed(1)}%',
+                      style: Typographyy.bodySmallRegular
+                          .copyWith(color: Colors.white),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          if (rates.isEmpty)
+            Text(
+              'Plan information loading...',
+              style:
+                  Typographyy.bodySmallRegular.copyWith(color: Colors.white70),
             ),
-          );
-        }).toList(),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Best available rate',
+                      style: Typographyy.bodySmallMedium
+                          .copyWith(color: Colors.white70),
+                    ),
+                    Text(
+                      '${bestRate.toStringAsFixed(1)}% APR',
+                      style: Typographyy.bodyLargeMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                style: _planSelectButtonStyle,
+                onPressed: () => _selectPlan(type),
+                child: Text(isSelected ? 'Plan Selected' : 'Choose Plan'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  ButtonStyle get _planSelectButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.white,
+      foregroundColor: priMeryColor,
+      elevation: 4,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    ).copyWith(
+      overlayColor: MaterialStateProperty.all(priMeryColor.withOpacity(0.12)),
     );
   }
 
@@ -1062,6 +1036,101 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
     );
   }
 
+  Widget _buildBenefitAndRulesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Benefits & Rules',
+              style: Typographyy.heading5.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(width: 10),
+            Icon(Icons.shield, color: priMeryColor),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: notifire.getContainerColor,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: priMeryColor.withOpacity(0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.check_circle, color: priMeryColor, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Review the rules before stacking to keep your funds secure.',
+                      style: Typographyy.bodyMediumMedium.copyWith(
+                        color: notifire.getTextColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+              _buildBenefitHighlights(),
+              const SizedBox(height: 24),
+              _buildRules(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBenefitHighlights() {
+    return Row(
+      children: [
+        Expanded(
+          child: _BenefitCard(
+            title: 'Core Benefits',
+            accent: priMeryColor,
+            icon: Icons.auto_graph,
+            items: const [
+              'Monthly interest credited automatically',
+              'Clear notifications for upcoming rewards',
+              'Flexible fluid stack withdrawals with notice',
+              'Built-in analytics to track progress',
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  ButtonStyle get _stakeButtonStyle {
+    return ElevatedButton.styleFrom(
+      backgroundColor: priMeryColor,
+      foregroundColor: Colors.white,
+      minimumSize: const Size.fromHeight(54),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      elevation: 8,
+      shadowColor: priMeryColor.withOpacity(0.45),
+    ).copyWith(
+      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.18)),
+    );
+  }
+
   Widget _buildRules() {
     return Row(
       children: [
@@ -1098,6 +1167,7 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
 
   Widget _buildAgreement() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Checkbox(
           value: rulesAccepted,
@@ -1107,51 +1177,50 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
             });
           },
         ),
-        const Expanded(
-          child: Text('I understand the lock & withdrawal rules'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'I understand the lock & withdrawal rules.',
+            style: Typographyy.bodyLargeMedium.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildActions() {
-    final tooltip = !_canStartStack
-        ? 'Amount must be >= ${minStakeTokens.toStringAsFixed(0)} tokens and agree to rules.'
-        : '';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Tooltip(
-          message: _canStartStack ? '' : tooltip,
-          child: ElevatedButton(
-            style: _stackPrimaryButtonStyle,
-            onPressed: _canStartStack ? _startStake : null,
-            child: isSubmitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Start Stack'),
+  Widget _buildConsentCTA() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: notifire.getContainerColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: priMeryColor.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 10),
+            blurRadius: 18,
           ),
-        ),
-        const SizedBox(height: 12),
-        if (selectedStackType == 'fluid')
-          OutlinedButton(
-            style: _stackSecondaryButtonStyle,
-            onPressed: () {
-              setState(() {
-                amountController.clear();
-                amountToStack = 0;
-                rulesAccepted = false;
-              });
-            },
-            child: const Text('Cancel Stack'),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildAgreement(),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: _stakeButtonStyle,
+              onPressed: _canStartStack ? _startStake : null,
+              child: const Text('Understand & Start Stake'),
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1168,28 +1237,7 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
       elevation: 8,
       shadowColor: priMeryColor.withOpacity(0.45),
     ).copyWith(
-      overlayColor:
-          MaterialStateProperty.all(Colors.white.withOpacity(0.15)),
-    );
-  }
-
-  ButtonStyle get _stackSecondaryButtonStyle {
-    return OutlinedButton.styleFrom(
-      side: BorderSide(color: priMeryColor.withOpacity(0.85), width: 1.3),
-      foregroundColor: priMeryColor,
-      disabledForegroundColor: priMeryColor.withOpacity(0.35),
-      backgroundColor: Colors.white,
-      disabledBackgroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-    ).copyWith(
-      overlayColor: MaterialStateProperty.resolveWith(
-        (states) => states.contains(MaterialState.pressed)
-            ? priMeryColor.withOpacity(0.12)
-            : Colors.transparent,
-      ),
+      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.15)),
     );
   }
 
@@ -1284,8 +1332,7 @@ class _TokenStackingPageState extends State<TokenStackingPage> {
               _KeyValue(
                 label: 'Monthly Return',
                 value: '${stake.interestRate.toStringAsFixed(1)}% / month',
-                tooltip:
-                    'Interest locked for ${stake.durationMonths} months.',
+                tooltip: 'Interest locked for ${stake.durationMonths} months.',
               ),
               _KeyValue(
                 label: 'Interest Earned',
@@ -1444,7 +1491,8 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: Typographyy.heading6.copyWith(fontSize: 20, color: valueColor),
+              style: Typographyy.heading6
+                  .copyWith(fontSize: 20, color: valueColor),
             ),
             if (detail != null)
               Text(
@@ -1518,6 +1566,79 @@ class _RuleCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class _BenefitCard extends StatelessWidget {
+  const _BenefitCard({
+    required this.title,
+    required this.accent,
+    required this.items,
+    required this.icon,
+  });
+
+  final String title;
+  final Color accent;
+  final List<String> items;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorNotifire notifire = Provider.of<ColorNotifire>(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: notifire.getContainerColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accent.withOpacity(0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0, 10),
+            blurRadius: 18,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: accent),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: Typographyy.bodyLargeMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: notifire.getTextColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check_circle, size: 18, color: accent),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: Typographyy.bodySmallRegular.copyWith(
+                        color: notifire.getTextColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1622,7 +1743,7 @@ class _InterestHistory extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-              '${entry.label} – ${entry.amount.toStringAsFixed(0)} tokens',
+                  '${entry.label} – ${entry.amount.toStringAsFixed(0)} tokens',
                   style: Typographyy.bodyMediumMedium,
                 ),
                 Container(
@@ -1741,12 +1862,11 @@ class StakingPosition {
     return StakingPosition(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
       stackType: json['stackType'] ?? json['stack_type'] ?? 'fixed',
-      tokenAmount:
-          _toDouble(json['tokenAmount'] ?? json['token_amount'] ?? 0),
+      tokenAmount: _toDouble(json['tokenAmount'] ?? json['token_amount'] ?? 0),
       durationMonths:
           (json['durationMonths'] ?? json['duration_months'] ?? 0).toInt(),
-      interestRate: _toDouble(
-          json['interestRate'] ?? json['monthlyInterestRate'] ?? 0),
+      interestRate:
+          _toDouble(json['interestRate'] ?? json['monthlyInterestRate'] ?? 0),
       expectedReturn:
           _toDouble(json['expectedReturn'] ?? json['expected_return'] ?? 0),
       interestEarned:
@@ -1758,8 +1878,10 @@ class StakingPosition {
             0,
       ),
       status: json['status']?.toString() ?? 'Active',
-      startDate: _parseDate(json['startDate'] ?? json['createdAt'] ?? json['startedAt']),
-      endDate: _parseDate(json['endDate'] ?? json['maturityDate'] ?? json['end_date']),
+      startDate: _parseDate(
+          json['startDate'] ?? json['createdAt'] ?? json['startedAt']),
+      endDate: _parseDate(
+          json['endDate'] ?? json['maturityDate'] ?? json['end_date']),
       nextInterestCreditAt:
           _parseDate(json['nextInterestCreditAt'] ?? json['nextInterestDate']),
       withdrawal: json['withdrawal'] is Map<String, dynamic>
@@ -1797,10 +1919,7 @@ class InterestEntry {
 
   factory InterestEntry.fromJson(Map<String, dynamic> json) {
     return InterestEntry(
-      label: json['label'] ??
-          json['month'] ??
-          json['period'] ??
-          'Interest',
+      label: json['label'] ?? json['month'] ?? json['period'] ?? 'Interest',
       amount: StakingPosition._toDouble(json['amount'] ?? json['value'] ?? 0),
       status: json['status']?.toString() ?? 'Pending',
     );
