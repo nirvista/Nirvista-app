@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +72,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
     'fluid': {3: 3, 6: 6, 12: 8, 24: 10},
   };
   List<StakingPosition> stakes = [];
+  final Set<String> expandedStakeIds = {};
 
   @override
   void initState() {
@@ -470,7 +471,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$stackLabel â€¢ $duration months',
+              '$stackLabel • $duration months',
               style: Typographyy.bodyLargeMedium.copyWith(
                 fontWeight: FontWeight.w600,
                 color: notifire.getTextColor,
@@ -543,8 +544,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
     for (final key in nestedKeyCandidates) {
       final nested = _mapFrom(data[key]);
       if (nested != null) {
-        final nestedValue =
-            _extractNumber(nested, _tokenWalletBalanceKeys);
+        final nestedValue = _extractNumber(nested, _tokenWalletBalanceKeys);
         if (nestedValue != null) return nestedValue;
       }
     }
@@ -552,8 +552,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
     for (final value in data.values) {
       final nested = _mapFrom(value);
       if (nested == null) continue;
-      final nestedValue =
-          _extractNumber(nested, _tokenWalletBalanceKeys);
+      final nestedValue = _extractNumber(nested, _tokenWalletBalanceKeys);
       if (nestedValue != null) return nestedValue;
     }
 
@@ -576,7 +575,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
   }
 
   String _countdown(DateTime? target) {
-    if (target == null) return 'ï¿½';
+    if (target == null) return '--';
     final difference = target.difference(DateTime.now());
     if (difference.isNegative) return 'Now';
     if (difference.inDays >= 1) return 'In ${difference.inDays} days';
@@ -585,7 +584,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return 'ï¿½';
+    if (date == null) return '--';
     final months = [
       'Jan',
       'Feb',
@@ -696,7 +695,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
 
   Widget _buildTopSummary() {
     final balanceText =
-        totalBalance != null ? _formatTokens(totalBalance!) : 'ï¿½ tokens';
+        totalBalance != null ? _formatTokens(totalBalance!) : '--';
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -1041,7 +1040,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
               ),
               const Spacer(),
               Text(
-                '$stackLabel â€¢ $selectedDuration months',
+                '$stackLabel • $selectedDuration months',
                 style: Typographyy.bodySmallMedium
                     .copyWith(color: notifire.getGry500_600Color),
               ),
@@ -1258,7 +1257,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${entry.key}M â€¢ ${entry.value.toStringAsFixed(1)}%',
+                      '${entry.key}M • ${entry.value.toStringAsFixed(1)}%',
                       style: Typographyy.bodySmallRegular
                           .copyWith(color: Colors.white),
                     ),
@@ -1591,7 +1590,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
           children: [
             const Icon(Icons.pie_chart, size: 32),
             const SizedBox(height: 12),
-            const Text('ðŸ“ˆ Start staking your tokens'),
+            const Text('Start staking your tokens'),
             const Text('Earn monthly interest automatically.'),
             const SizedBox(height: 12),
             Text(
@@ -1609,6 +1608,16 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
     );
   }
 
+  void _toggleStakeExpansion(String stakeId) {
+    setState(() {
+      if (expandedStakeIds.contains(stakeId)) {
+        expandedStakeIds.remove(stakeId);
+      } else {
+        expandedStakeIds.add(stakeId);
+      }
+    });
+  }
+
   Widget _buildStakeCard(StakingPosition stake) {
     final withdrawable = stake.withdrawal?['withdrawableAt'];
     DateTime? withdrawableAt;
@@ -1622,6 +1631,24 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
         isFluid && stake.withdrawal == null && processingWithdrawalId == null;
     final canClaim = stake.status.toLowerCase() == 'matured' ||
         (withdrawableAt != null && withdrawableAt.isBefore(DateTime.now()));
+    final isExpanded = expandedStakeIds.contains(stake.id);
+
+    Widget statusBadge() {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: priMeryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          stake.status,
+          style: Typographyy.bodyLargeMedium.copyWith(
+            color: priMeryColor,
+          ),
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       padding: const EdgeInsets.all(20),
@@ -1633,28 +1660,32 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                '${stake.stackType.toUpperCase()} STAKE â€“ ${stake.durationMonths} Months',
-                style: Typographyy.heading6.copyWith(fontSize: 18),
-              ),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: priMeryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => _toggleStakeExpansion(stake.id),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${stake.stackType.toUpperCase()} STAKE - ${stake.durationMonths} Months',
+                        style: Typographyy.heading6.copyWith(fontSize: 18),
+                      ),
+                    ),
+                    statusBadge(),
+                    const SizedBox(width: 8),
+                    Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                      color: notifire.getGry500_600Color,
+                    ),
+                  ],
                 ),
-                child: Text(
-                  stake.status,
-                  style: Typographyy.bodyLargeMedium.copyWith(
-                    color: priMeryColor,
-                  ),
-                ),
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -1675,83 +1706,99 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _ProgressRing(progress: stake.progress),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _KeyValue(
-                label: 'Start Date',
-                value: _formatDate(stake.startDate),
-              ),
-              _KeyValue(
-                label: 'Maturity',
-                value: _formatDate(stake.endDate),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Next interest credit: ${_countdown(stake.nextInterestCreditAt)}',
-            style: Typographyy.bodyMediumMedium,
-          ),
-          if (withdrawableAt != null)
+          if (isExpanded) ...[
+            const SizedBox(height: 16),
+            _ProgressRing(progress: stake.progress),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _KeyValue(
+                  label: 'Start Date',
+                  value: _formatDate(stake.startDate),
+                ),
+                _KeyValue(
+                  label: 'Maturity',
+                  value: _formatDate(stake.endDate),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Text(
-              'Withdrawal available ${_countdown(withdrawableAt)}',
+              'Next interest credit: ${_countdown(stake.nextInterestCreditAt)}',
               style: Typographyy.bodyMediumMedium,
             ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: canRequestWithdrawal
-                    ? () => _requestWithdrawal(stake)
-                    : null,
-                child: processingWithdrawalId == stake.id
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Request Withdrawal'),
+            if (withdrawableAt != null)
+              Text(
+                'Withdrawal available ${_countdown(withdrawableAt)}',
+                style: Typographyy.bodyMediumMedium,
               ),
-              const SizedBox(width: 12),
-              if (canClaim)
-                ElevatedButton(
-                  onPressed: processingClaimId == stake.id
-                      ? null
-                      : () => _claimStake(stake),
-                  child: processingClaimId == stake.id
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Claim'),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: canRequestWithdrawal
+                        ? () => _requestWithdrawal(stake)
+                        : null,
+                    child: processingWithdrawalId == stake.id
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Request Withdrawal'),
+                  ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _InterestHistory(entries: stake.interestHistory),
-          const SizedBox(height: 12),
-          _TransactionDetails(stake: stake, formatDate: _formatDate),
+                if (canClaim) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: processingClaimId == stake.id
+                          ? null
+                          : () => _claimStake(stake),
+                      child: processingClaimId == stake.id
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Claim'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            _InterestHistory(entries: stake.interestHistory),
+            const SizedBox(height: 12),
+            _TransactionDetails(stake: stake, formatDate: _formatDate),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildNotifications() {
-    final notifications = [
-      'ðŸŽ‰ Your monthly interest is available',
-      'â³ Withdrawal available in 3 days',
-      'ðŸ”” Your Fixed Stake matures today',
+    const notifications = [
+      _NotificationItem(
+        icon: Icons.monetization_on_outlined,
+        message: 'Your monthly interest is available',
+      ),
+      _NotificationItem(
+        icon: Icons.schedule,
+        message: 'Withdrawal available in 3 days',
+      ),
+      _NotificationItem(
+        icon: Icons.flag_outlined,
+        message: 'Your Fixed Stake matures today',
+      ),
     ];
     return Container(
       width: double.infinity,
@@ -1767,9 +1814,17 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
             .map(
               (note) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Text(
-                  note,
-                  style: Typographyy.bodyLargeMedium,
+                child: Row(
+                  children: [
+                    Icon(note.icon, size: 20, color: priMeryColor),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        note.message,
+                        style: Typographyy.bodyLargeMedium,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -2078,7 +2133,7 @@ class _InterestHistory extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${entry.label} â€“ ${entry.amount.toStringAsFixed(0)} tokens',
+                  '${entry.label} - ${entry.amount.toStringAsFixed(0)} tokens',
                   style: Typographyy.bodyMediumMedium,
                 ),
                 Container(
@@ -2128,15 +2183,25 @@ class _TransactionDetails extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text('Transaction ID: ${stake.transactionId ?? 'ï¿½'}'),
+        Text('Transaction ID: ${stake.transactionId ?? 'N/A'}'),
         Text('Status: ${stake.status}'),
         Text('Duration: ${stake.durationMonths} Months'),
         Text(
-          'Network Fee: ${stake.networkFee?.toStringAsFixed(2) ?? 'ï¿½'} tokens',
+          'Network Fee: ${stake.networkFee?.toStringAsFixed(2) ?? 'N/A'} tokens',
         ),
       ],
     );
   }
+}
+
+class _NotificationItem {
+  final IconData icon;
+  final String message;
+
+  const _NotificationItem({
+    required this.icon,
+    required this.message,
+  });
 }
 
 class StakingPosition {
