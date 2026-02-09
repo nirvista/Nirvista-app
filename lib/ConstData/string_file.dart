@@ -11,7 +11,7 @@ class AppTranslations extends Translations {
       'Or with email': 'Or with email',
       'Username or email': 'Username or email',
       'Password': 'Password',
-      'Make M Capital': 'Make M Capital',
+      'Mobile No.': 'Mobile No.',
       'Enter mobile number': 'Enter mobile number',
       'Send': 'Send',
       'GetHelp': 'GetHelp',

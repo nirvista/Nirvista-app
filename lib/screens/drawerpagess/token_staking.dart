@@ -35,10 +35,32 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
 
   double minStakeTokens = 100;
   double amountToStake = 1000;
-  double? totalBalance;
+  double totalBalance = 0;
   double totalStaked = 0;
   double availableRewards = 0;
   DateTime? nextRewardDate;
+
+  static const List<String> _summaryBalanceKeys = [
+    'totalBalance',
+    'total_balance',
+    'availableBalance',
+    'available_balance',
+    'walletBalance',
+    'wallet_balance',
+  ];
+
+  static const List<String> _tokenWalletBalanceKeys = [
+    'balance',
+    'availableBalance',
+    'available_balance',
+    'walletBalance',
+    'wallet_balance',
+    'tokenBalance',
+    'token_balance',
+    'tokenAmount',
+    'token_amount',
+    'amount',
+  ];
 
   String selectedStakeType = 'fixed';
   int selectedDuration = 12;
@@ -168,14 +190,7 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
       final response = await AuthApiService.getWalletSummary();
       if (response['success'] == true) {
         final data = _unwrap(response);
-        final balance = _extractNumber(data, [
-          'totalBalance',
-          'total_balance',
-          'availableBalance',
-          'available_balance',
-          'walletBalance',
-          'wallet_balance',
-        ]);
+        final balance = _resolveTokenBalance(data);
         if (balance != null) {
           setState(() {
             totalBalance = balance;
@@ -509,6 +524,45 @@ class _TokenStakingPageState extends State<TokenStakingPage> {
         if (parsed != null) return parsed;
       }
     }
+    return null;
+  }
+
+  double? _resolveTokenBalance(Map<String, dynamic> data) {
+    final direct = _extractNumber(data, _summaryBalanceKeys);
+    if (direct != null) return direct;
+
+    const nestedKeyCandidates = [
+      'tokenWallet',
+      'token_wallet',
+      'tokenWalletSummary',
+      'token_wallet_summary',
+      'token',
+      'wallet',
+    ];
+
+    for (final key in nestedKeyCandidates) {
+      final nested = _mapFrom(data[key]);
+      if (nested != null) {
+        final nestedValue =
+            _extractNumber(nested, _tokenWalletBalanceKeys);
+        if (nestedValue != null) return nestedValue;
+      }
+    }
+
+    for (final value in data.values) {
+      final nested = _mapFrom(value);
+      if (nested == null) continue;
+      final nestedValue =
+          _extractNumber(nested, _tokenWalletBalanceKeys);
+      if (nestedValue != null) return nestedValue;
+    }
+
+    return null;
+  }
+
+  Map<String, dynamic>? _mapFrom(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
     return null;
   }
 

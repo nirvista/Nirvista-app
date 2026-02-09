@@ -59,6 +59,8 @@ class _SettingsState extends State<Settings> {
   String? _referralCode;
   Map<String, dynamic>? _referralAnalytics;
 
+  static const String _referralBaseUrl = 'https://register.nirvista.io';
+
   @override
   void initState() {
     super.initState();
@@ -213,9 +215,8 @@ class _SettingsState extends State<Settings> {
             payload['referralCode'] ??
             payload['referral'] ??
             payload['referral_code'];
-        final analyticsSource = payload['analytics'] ??
-            payload['stats'] ??
-            payload['statistics'];
+        final analyticsSource =
+            payload['analytics'] ?? payload['stats'] ?? payload['statistics'];
         Map<String, dynamic>? analytics;
         if (analyticsSource is Map<String, dynamic>) {
           analytics = analyticsSource;
@@ -279,13 +280,18 @@ class _SettingsState extends State<Settings> {
   }
 
   Widget _buildReferralShareRow(String? code) {
-    final linkValue = (_referralLink?.trim().isNotEmpty ?? false)
-        ? _referralLink!
+    final linkValue =
+        (_referralLink?.trim().isNotEmpty ?? false) ? _referralLink! : null;
+    final shareCandidate =
+        (code?.trim().isNotEmpty ?? false) ? code!.trim() : null;
+    final rawShareValue = linkValue ?? shareCandidate;
+    final shareValue = rawShareValue == null
+        ? null
+        : _formatReferralSharingValue(rawShareValue);
+    final openLinkValue = shareValue != null &&
+            shareValue.startsWith(RegExp(r'https?://', caseSensitive: false))
+        ? shareValue
         : null;
-    final shareCandidate = (code?.trim().isNotEmpty ?? false)
-        ? code!.trim()
-        : null;
-    final shareValue = linkValue ?? shareCandidate;
 
     if (_isReferralLinkLoading) {
       return const LinearProgressIndicator();
@@ -347,8 +353,7 @@ class _SettingsState extends State<Settings> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: priMeryColor),
                         foregroundColor: priMeryColor,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -368,8 +373,7 @@ class _SettingsState extends State<Settings> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       icon: const Icon(Icons.share, size: 18),
                       label: Text("Share link".tr,
@@ -382,12 +386,12 @@ class _SettingsState extends State<Settings> {
             ],
           ),
         ),
-        if (linkValue != null) ...[
+        if (openLinkValue != null) ...[
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _openReferralLink(linkValue),
+              onPressed: () => _openReferralLink(openLinkValue),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: priMeryColor),
                 foregroundColor: priMeryColor,
@@ -395,8 +399,8 @@ class _SettingsState extends State<Settings> {
               icon: Icon(Icons.open_in_new, color: priMeryColor),
               label: Text(
                 "Open link".tr,
-                style: Typographyy.bodySmallSemiBold
-                    .copyWith(color: priMeryColor),
+                style:
+                    Typographyy.bodySmallSemiBold.copyWith(color: priMeryColor),
               ),
             ),
           ),
@@ -410,6 +414,21 @@ class _SettingsState extends State<Settings> {
     final parsed = DateTime.tryParse(date);
     if (parsed == null) return date;
     return "${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}";
+  }
+
+  String _formatReferralSharingValue(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final protocolRegex = RegExp(r'https?://', caseSensitive: false);
+    if (protocolRegex.hasMatch(trimmed)) {
+      return trimmed;
+    }
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('register.nirvista.io')) {
+      return 'https://$trimmed';
+    }
+    final sanitized = trimmed.replaceAll(RegExp(r'^/+'), '');
+    return '$_referralBaseUrl/$sanitized';
   }
 
   @override
@@ -438,21 +457,21 @@ class _SettingsState extends State<Settings> {
         }
 
         if (data != null) {
-        final profileMap = data;
-        final verification = profileMap['verification'];
-        final rawStatus = verification is Map<String, dynamic>
-            ? verification['kycStatus'] ?? verification['status']
-            : profileMap['kycStatus'] ?? profileMap['status'];
-        final normalizedStatus = _normalizeKycStatus(rawStatus?.toString());
-        setState(() {
-          profileData = profileMap;
-          kycStatus = normalizedStatus;
-          final serverName = profileMap['name']?.toString() ?? '';
-          if (!nameInitialized || nameController.text != serverName) {
-            nameController.text = serverName;
-            nameInitialized = true;
-          }
-        });
+          final profileMap = data;
+          final verification = profileMap['verification'];
+          final rawStatus = verification is Map<String, dynamic>
+              ? verification['kycStatus'] ?? verification['status']
+              : profileMap['kycStatus'] ?? profileMap['status'];
+          final normalizedStatus = _normalizeKycStatus(rawStatus?.toString());
+          setState(() {
+            profileData = profileMap;
+            kycStatus = normalizedStatus;
+            final serverName = profileMap['name']?.toString() ?? '';
+            if (!nameInitialized || nameController.text != serverName) {
+              nameController.text = serverName;
+              nameInitialized = true;
+            }
+          });
         } else {
           setState(() {
             profileError = 'Failed to load profile data.';
@@ -532,7 +551,8 @@ class _SettingsState extends State<Settings> {
       final response = await AuthApiService.getKycStatus();
       if (response['success'] == true) {
         final data = response['data'] is Map<String, dynamic>
-            ? Map<String, dynamic>.from(response['data'] as Map<String, dynamic>)
+            ? Map<String, dynamic>.from(
+                response['data'] as Map<String, dynamic>)
             : null;
         final rawStatus = data?['status'] ?? data?['kycStatus'];
         final statusValue =
@@ -1057,12 +1077,12 @@ class _SettingsState extends State<Settings> {
                   body: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: TabBarView(children: [
-                    _tabContent(_buildUser(width: constraints.maxWidth)),
-                    _tabContent(_buildReferrals(width: constraints.maxWidth)),
-                    _tabContent(_buildApi(width: constraints.maxWidth)),
-                    _tabContent(_build2SF(width: constraints.maxWidth)),
-                    _tabContent(_buildKycSection()),
-                    _tabContent(_buildHelpSection()),
+                      _tabContent(_buildUser(width: constraints.maxWidth)),
+                      _tabContent(_buildReferrals(width: constraints.maxWidth)),
+                      _tabContent(_buildApi(width: constraints.maxWidth)),
+                      _tabContent(_build2SF(width: constraints.maxWidth)),
+                      _tabContent(_buildKycSection()),
+                      _tabContent(_buildHelpSection()),
                     ]),
                   ));
             } else {
@@ -1773,8 +1793,8 @@ class _SettingsState extends State<Settings> {
               const SizedBox(height: 8),
               Text(
                 value,
-                style: Typographyy.heading6
-                    .copyWith(color: notifire.getTextColor),
+                style:
+                    Typographyy.heading6.copyWith(color: notifire.getTextColor),
               ),
               const SizedBox(height: 6),
               Text(
@@ -1847,8 +1867,8 @@ class _SettingsState extends State<Settings> {
                   Expanded(
                     child: Text(
                       entry['title'] as String,
-                      style: Typographyy.bodyMediumSemiBold.copyWith(
-                          color: notifire.getTextColor),
+                      style: Typographyy.bodyMediumSemiBold
+                          .copyWith(color: notifire.getTextColor),
                     ),
                   ),
                 ],
@@ -2338,8 +2358,7 @@ class _SettingsState extends State<Settings> {
       case 'approved':
         return Text(
           "KYC verified and validated by admin.",
-          style:
-              Typographyy.bodySmallRegular.copyWith(color: Colors.green),
+          style: Typographyy.bodySmallRegular.copyWith(color: Colors.green),
         );
       case 'pending':
         return Text(
@@ -2454,15 +2473,15 @@ class _SettingsState extends State<Settings> {
             border: Border.all(color: notifire.getGry700_300Color),
             color: notifire.getBgColor,
           ),
-        child: Text(
-          value,
-          style: Typographyy.bodyMediumMedium
-              .copyWith(color: notifire.getGry500_600Color),
+          child: Text(
+            value,
+            style: Typographyy.bodyMediumMedium
+                .copyWith(color: notifire.getGry500_600Color),
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Future<void> _launchSupportEmail() async {
     final uri = Uri(

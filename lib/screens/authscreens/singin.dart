@@ -266,7 +266,7 @@ class _SingInScreenState extends State<SingInScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                            Text(
-                             "Make M Capital".tr,
+                            "Mobile No.".tr,
                              style: Typographyy.bodyMediumMedium
                                  .copyWith(color: notifire.getGry500_600Color),
                            ),

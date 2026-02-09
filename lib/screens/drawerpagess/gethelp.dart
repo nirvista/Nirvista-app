@@ -50,19 +50,23 @@ const List<String> _searchChips = [
 const List<Map<String, String>> _categoryCards = [
   {
     'title': 'Sending Money',
-    'description': 'Send funds instantly and securely using blockchain-powered transactions.',
+    'description':
+        'Send funds instantly and securely using blockchain-powered transactions.',
   },
   {
     'title': 'Your Account',
-    'description': 'Manage your profile, KYC status, security settings, and verification details.',
+    'description':
+        'Manage your profile, KYC status, security settings, and verification details.',
   },
   {
     'title': 'Sell Token',
-    'description': 'Convert your NVT tokens into supported currencies after KYC verification.',
+    'description':
+        'Convert your NVT tokens into supported currencies after KYC verification.',
   },
   {
     'title': 'Nirvista Business',
-    'description': 'Tools and solutions for merchants and enterprises using Nirvista payments.',
+    'description':
+        'Tools and solutions for merchants and enterprises using Nirvista payments.',
   },
 ];
 
@@ -91,21 +95,22 @@ class _GetHelpState extends State<GetHelp> {
     final width = MediaQuery.of(context).size.width;
     return Container(
       width: double.infinity,
-      height: double.infinity,
       color: notifire.getBgColor,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Get Help',
-              style: Typographyy.heading4.copyWith(color: notifire.getTextColor),
+              style:
+                  Typographyy.heading4.copyWith(color: notifire.getTextColor),
             ),
             const SizedBox(height: 6),
             Text(
               'Your support center for Nirvista Wallet, ICO, and Business services.',
-              style: Typographyy.bodyMediumMedium.copyWith(color: notifire.getGry500_600Color),
+              style: Typographyy.bodyMediumMedium
+                  .copyWith(color: notifire.getGry500_600Color),
             ),
             const SizedBox(height: 12),
             _buildTopFaqSection(notifire, width),
@@ -121,6 +126,7 @@ class _GetHelpState extends State<GetHelp> {
             _buildGlobalNotice(notifire),
             const SizedBox(height: 12),
             _buildSupportCta(notifire),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -155,17 +161,21 @@ class _GetHelpState extends State<GetHelp> {
                         children: [
                           Text(
                             card['title']!,
-                            style: Typographyy.heading6.copyWith(color: notifire.getTextColor, height: 1.3),
+                            style: Typographyy.heading6.copyWith(
+                                color: notifire.getTextColor, height: 1.3),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             card['description']!,
-                            style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry500_600Color, height: 1.4),
+                            style: Typographyy.bodySmallMedium.copyWith(
+                                color: notifire.getGry500_600Color,
+                                height: 1.4),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             card['meta']!,
-                            style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry700_300Color),
+                            style: Typographyy.bodySmallMedium
+                                .copyWith(color: notifire.getGry700_300Color),
                           ),
                         ],
                       ),
@@ -188,7 +198,8 @@ class _GetHelpState extends State<GetHelp> {
         const SizedBox(height: 6),
         Text(
           'Search answers, FAQs, and guides to resolve your issues instantly.',
-          style: Typographyy.bodyMediumMedium.copyWith(color: notifire.getGry500_600Color),
+          style: Typographyy.bodyMediumMedium
+              .copyWith(color: notifire.getGry500_600Color),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -196,7 +207,8 @@ class _GetHelpState extends State<GetHelp> {
           decoration: InputDecoration(
             prefixIcon: Icon(Icons.search, color: notifire.getGry500_600Color),
             hintText: 'Search help topics…',
-            hintStyle: Typographyy.bodyMediumMedium.copyWith(color: notifire.getGry500_600Color),
+            hintStyle: Typographyy.bodyMediumMedium
+                .copyWith(color: notifire.getGry500_600Color),
             filled: true,
             fillColor: notifire.getContainerColor,
             border: OutlineInputBorder(
@@ -218,7 +230,8 @@ class _GetHelpState extends State<GetHelp> {
                     backgroundColor: notifire.getContainerColor,
                     label: Text(
                       chip,
-                      style: Typographyy.bodySmallMedium.copyWith(color: notifire.getTextColor),
+                      style: Typographyy.bodySmallMedium
+                          .copyWith(color: notifire.getTextColor),
                     ),
                   ))
               .toList(),
@@ -255,12 +268,15 @@ class _GetHelpState extends State<GetHelp> {
                         children: [
                           Text(
                             category['title']!,
-                            style: Typographyy.heading6.copyWith(color: notifire.getTextColor, height: 1.3),
+                            style: Typographyy.heading6.copyWith(
+                                color: notifire.getTextColor, height: 1.3),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             category['description']!,
-                            style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry500_600Color, height: 1.4),
+                            style: Typographyy.bodySmallMedium.copyWith(
+                                color: notifire.getGry500_600Color,
+                                height: 1.4),
                           ),
                         ],
                       ),
@@ -283,7 +299,8 @@ class _GetHelpState extends State<GetHelp> {
         const SizedBox(height: 6),
         Text(
           'Holding balances, managing wallets, making payments, and using digital assets securely.',
-          style: Typographyy.bodyMediumMedium.copyWith(color: notifire.getGry500_600Color),
+          style: Typographyy.bodyMediumMedium
+              .copyWith(color: notifire.getGry500_600Color),
         ),
       ],
     );
@@ -320,7 +337,8 @@ class _GetHelpState extends State<GetHelp> {
           const SizedBox(height: 12),
           Text(
             'Your balance access may be limited due to one of the following reasons:',
-            style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry500_600Color),
+            style: Typographyy.bodySmallMedium
+                .copyWith(color: notifire.getGry500_600Color),
           ),
           const SizedBox(height: 10),
           ...bullets
@@ -343,7 +361,8 @@ class _GetHelpState extends State<GetHelp> {
                       Expanded(
                         child: Text(
                           bullet,
-                          style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry500_600Color, height: 1.4),
+                          style: Typographyy.bodySmallMedium.copyWith(
+                              color: notifire.getGry500_600Color, height: 1.4),
                         ),
                       ),
                     ],
@@ -354,7 +373,8 @@ class _GetHelpState extends State<GetHelp> {
           const SizedBox(height: 12),
           Text(
             'Resolution steps:',
-            style: Typographyy.bodyMediumSemiBold.copyWith(color: notifire.getTextColor),
+            style: Typographyy.bodyMediumSemiBold
+                .copyWith(color: notifire.getTextColor),
           ),
           const SizedBox(height: 8),
           ...steps
@@ -365,7 +385,8 @@ class _GetHelpState extends State<GetHelp> {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
                     '${entry.key + 1}. ${entry.value}',
-                    style: Typographyy.bodySmallMedium.copyWith(color: notifire.getGry500_600Color),
+                    style: Typographyy.bodySmallMedium
+                        .copyWith(color: notifire.getGry500_600Color),
                   ),
                 ),
               )
@@ -385,7 +406,8 @@ class _GetHelpState extends State<GetHelp> {
       ),
       child: Text(
         _globalNotice,
-        style: Typographyy.bodySmallMedium.copyWith(color: notifire.getTextColor),
+        style:
+            Typographyy.bodySmallMedium.copyWith(color: notifire.getTextColor),
       ),
     );
   }
@@ -401,7 +423,8 @@ class _GetHelpState extends State<GetHelp> {
         const SizedBox(height: 8),
         Text(
           'Contact Nirvista Support',
-          style: Typographyy.bodyMediumMedium.copyWith(color: notifire.getGry500_600Color),
+          style: Typographyy.bodyMediumMedium
+              .copyWith(color: notifire.getGry500_600Color),
         ),
         const SizedBox(height: 16),
         Wrap(
@@ -411,24 +434,30 @@ class _GetHelpState extends State<GetHelp> {
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               ),
               child: const Text('Raise Support Ticket (Coming Soon)'),
             ),
             ElevatedButton(
               onPressed: () => launchUrlString('mailto:support@nirvista.com'),
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               ),
               child: const Text('Email Support'),
             ),
             ElevatedButton(
               onPressed: null,
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               ),
               child: const Text('Live Chat (Coming Soon)'),
             ),
