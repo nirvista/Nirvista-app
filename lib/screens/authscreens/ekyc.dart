@@ -9,6 +9,7 @@ import '../../ConstData/colorfile.dart';
 import '../../ConstData/colorprovider.dart';
 import '../../ConstData/typography.dart';
 import '../../services/auth_api_service.dart';
+import '../drawerpagess/termsandcondition/policy_detail.dart';
 
 enum KycStatus { pending, approved, rejected }
 
@@ -224,12 +225,21 @@ class _KycPageState extends State<KycPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Privacy Policy".tr,
-                          style: Typographyy.bodyLargeSemiBold
-                              .copyWith(color: notifire.getGry600_500Color)),
-                      Text("Copyright 2023".tr,
-                          style: Typographyy.bodyLargeSemiBold
-                              .copyWith(color: notifire.getGry600_500Color)),
+                      InkWell(
+                        onTap: () => Get.to(
+                          () => const PolicyDetailScreen(
+                              policyTitle: 'PRIVACY POLICY'),
+                        ),
+                        child: Text("Privacy Policy".tr,
+                            style: Typographyy.bodyLargeSemiBold
+                                .copyWith(color: notifire.getGry600_500Color)),
+                      ),
+                      Text(
+                        "© 2026 Nirvista. All rights reserved. Access subject to eligibility"
+                            .tr,
+                        style: Typographyy.bodyLargeSemiBold
+                            .copyWith(color: notifire.getGry600_500Color),
+                      ),
                     ],
                   ),
                 ),

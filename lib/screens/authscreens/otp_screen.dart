@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../CommonWidgets/applogo.dart';
 import '../../CommonWidgets/bottombar.dart';
 import '../../ConstData/colorfile.dart';
 import '../../ConstData/colorprovider.dart';
@@ -55,12 +54,7 @@ class _OtpScreenState extends State<OtpScreen> {
         return Scaffold(
           bottomNavigationBar: const BottomBarr(),
           backgroundColor: notifire.getBgColor,
-          appBar: constraints.maxWidth < 600
-              ? appBar(isphone: true)
-              : PreferredSize(
-                  preferredSize: const Size.fromHeight(80),
-                  child: appBar(isphone: false),
-                ),
+          appBar: null,
           body: GetBuilder<SingInController>(
             init: controller,
             builder: (controller) {
@@ -84,13 +78,14 @@ class _OtpScreenState extends State<OtpScreen> {
                           children: [
                             const SizedBox(height: 16),
                             Text(
-                              "Verify your mobile".tr,
+                              "Verify Your Mobile Number".tr,
                               style: Typographyy.heading3
                                   .copyWith(color: notifire.getWhitAndBlack),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              "We have sent a code to your mobile".tr,
+                              "A code has been sent to verify your registered mobile number."
+                                  .tr,
                               style: Typographyy.bodyLargeMedium
                                   .copyWith(color: notifire.getGry500_600Color),
                               textAlign: TextAlign.center,
@@ -172,7 +167,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                     ? const CircularProgressIndicator(
                                         color: Colors.white)
                                     : Text(
-                                        "Verify OTP".tr,
+                                        "Verify & Continue".tr,
                                         style: Typographyy.bodyLargeSemiBold
                                             .copyWith(
                                                 color: Colors.white,
@@ -198,7 +193,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       await controller.sendLoginOtp();
                                     },
                               child: Text(
-                                "Resend code".tr,
+                                "Resend OTP".tr,
                                 style: Typographyy.bodyMediumSemiBold
                                     .copyWith(color: priMeryColor),
                               ),
@@ -214,29 +209,6 @@ class _OtpScreenState extends State<OtpScreen> {
           ),
         );
       },
-    );
-  }
-  PreferredSizeWidget appBar({required bool isphone}){
-    return AppBar(
-      toolbarHeight: isphone? 52 : 120.0,
-      actions: [
-        Padding(
-          padding:  EdgeInsets.symmetric(vertical: isphone?  8  :12),
-          child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: priMeryColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                fixedSize:  Size(isphone?100:156, isphone? 30 : 50),
-              ),
-              child: Center(child: Text("Sing In",style: Typographyy.bodyLargeSemiBold.copyWith(color: Colors.white,fontWeight: FontWeight.w400),))),
-        ),
-        const SizedBox(width: 10,),
-      ],
-      automaticallyImplyLeading: false,
-      backgroundColor: notifire.getAppBarColor,
-      centerTitle: false,
-      title: isphone? const AppLogo(textColor: Colors.white,size: 80,):  const AppLogo(textColor: Colors.white,),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../CommonWidgets/applogo.dart';
 import '../../CommonWidgets/bottombar.dart';
 import '../../ConstData/colorfile.dart';
 import '../../ConstData/colorprovider.dart';
@@ -63,12 +62,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
         return Scaffold(
           backgroundColor: notifire.getBgColor,
           bottomNavigationBar: const BottomBarr(),
-          appBar: constraints.maxWidth < 600
-              ? appBar(isphone: true)
-              : PreferredSize(
-                  preferredSize: const Size.fromHeight(80),
-                  child: appBar(isphone: false),
-                ),
+          appBar: null,
           body: Center(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -90,13 +84,14 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
                           children: [
                             const SizedBox(height: 20),
                             Text(
-                              "Verify your mobile".tr,
+                              "Verify Your Mobile Number".tr,
                               style: Typographyy.heading3
                                   .copyWith(color: notifire.getWhitAndBlack),
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              "Enter the OTP sent to".tr,
+                              "A code has been sent to verify your registered mobile number."
+                                  .tr,
                               style: Typographyy.bodyLargeMedium.copyWith(
                                   color: notifire.getGry500_600Color),
                             ),
@@ -155,7 +150,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
                                     ? const CircularProgressIndicator(
                                         color: Colors.white)
                                     : Text(
-                                        "Verify OTP".tr,
+                                        "Verify & Continue".tr,
                                         style: Typographyy.bodyLargeSemiBold
                                             .copyWith(
                                                 color: Colors.white,
@@ -183,7 +178,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
                               child: Text(
                                 state.isTimerRunning
                                     ? "Resend in ${state.otpTimer}s"
-                                    : "Resend code",
+                                    : "Resend OTP",
                                 style: Typographyy.bodyMediumSemiBold
                                     .copyWith(color: priMeryColor),
                               ),
@@ -202,15 +197,4 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
     );
   }
 
-  PreferredSizeWidget appBar({required bool isphone}) {
-    return AppBar(
-      toolbarHeight: isphone ? 52 : 120.0,
-      automaticallyImplyLeading: false,
-      backgroundColor: notifire.getAppBarColor,
-      centerTitle: false,
-      title: isphone
-          ? const AppLogo(textColor: Colors.white, size: 80)
-          : const AppLogo(textColor: Colors.white),
-    );
-  }
 }

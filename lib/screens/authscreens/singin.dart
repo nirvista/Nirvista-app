@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:nirvista/screens/authscreens/signup_disabled.dart';
 import 'package:nirvista/screens/authscreens/otp_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -241,17 +240,17 @@ class _SingInScreenState extends State<SingInScreen> {
                       SizedBox(
                         height: width < 600 ? 40 : 148,
                       ),
-                      Text("Sign in to Nirvista".tr,
+                      Text("Login into Nirvista ICO".tr,
                           style: Typographyy.heading3
                               .copyWith(color: notifire.getTextColor)),
                       const SizedBox(
                         height: 16,
                       ),
-                      Text(
-                        "Send, spend and save smarter".tr,
-                        style: Typographyy.bodyLargeRegular
-                            .copyWith(color: notifire.getGry500_600Color),
-                      ),
+                       Text(
+                         "Access Pre-ICO & ICO".tr,
+                         style: Typographyy.bodyLargeRegular
+                             .copyWith(color: notifire.getGry500_600Color),
+                       ),
                       SizedBox(
                         height: width < 600 ? 20 : 40,
                       ),
@@ -266,11 +265,11 @@ class _SingInScreenState extends State<SingInScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "mobile no.",
-                            style: Typographyy.bodyMediumMedium
-                                .copyWith(color: notifire.getGry500_600Color),
-                          ),
+                           Text(
+                             "Make M Capital".tr,
+                             style: Typographyy.bodyMediumMedium
+                                 .copyWith(color: notifire.getGry500_600Color),
+                           ),
                           const SizedBox(height: 10),
                           TextField(
                             controller: controller.phoneController,
@@ -289,8 +288,9 @@ class _SingInScreenState extends State<SingInScreen> {
                                 }
                               }
                             },
-                            decoration: InputDecoration(
-                              hintText: "mobile",
+                             decoration: InputDecoration(
+                               // Using mobile number hint to keep the purpose clear.
+                               hintText: "Enter mobile number".tr,
                               border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(color: notifire.getGry700_300Color)),
@@ -343,22 +343,6 @@ class _SingInScreenState extends State<SingInScreen> {
                         ),
                       const SizedBox(
                         height: 32,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Don’t have an account?".tr,
-                              style: Typographyy.bodyLargeMedium
-                                  .copyWith(color: notifire.getWhitAndBlack)),
-                          InkWell(
-                              onTap: () {
-                                Get.to(const SignupDisabledScreen());
-                              },
-                              child: Text(" Sign Up".tr,
-                                  style: Typographyy.bodyLargeExtraBold
-                                      .copyWith(
-                                          color: notifire.getWhitAndBlack)))
-                        ],
                       ),
                     ]),
               ),

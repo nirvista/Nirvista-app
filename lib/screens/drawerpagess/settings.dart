@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -56,6 +57,7 @@ class _SettingsState extends State<Settings> {
   String? _referralLinkError;
   String? _referralLink;
   String? _referralCode;
+  Map<String, dynamic>? _referralAnalytics;
 
   @override
   void initState() {
@@ -211,10 +213,20 @@ class _SettingsState extends State<Settings> {
             payload['referralCode'] ??
             payload['referral'] ??
             payload['referral_code'];
+        final analyticsSource = payload['analytics'] ??
+            payload['stats'] ??
+            payload['statistics'];
+        Map<String, dynamic>? analytics;
+        if (analyticsSource is Map<String, dynamic>) {
+          analytics = analyticsSource;
+        } else if (analyticsSource is Map) {
+          analytics = Map<String, dynamic>.from(analyticsSource);
+        }
         if (mounted) {
           setState(() {
             _referralLink = link?.toString();
             _referralCode = code?.toString();
+            _referralAnalytics = analytics;
           });
         }
       } else {
@@ -426,20 +438,21 @@ class _SettingsState extends State<Settings> {
         }
 
         if (data != null) {
-          final profileMap = data;
-          final verification = profileMap['verification'];
-          final statusValue = verification is Map<String, dynamic>
-              ? verification['kycStatus'] ?? 'pending'
-              : 'pending';
-          setState(() {
-            profileData = profileMap;
-            kycStatus = statusValue.toString().toLowerCase();
-            final serverName = profileMap['name']?.toString() ?? '';
-            if (!nameInitialized || nameController.text != serverName) {
-              nameController.text = serverName;
-              nameInitialized = true;
-            }
-          });
+        final profileMap = data;
+        final verification = profileMap['verification'];
+        final rawStatus = verification is Map<String, dynamic>
+            ? verification['kycStatus'] ?? verification['status']
+            : profileMap['kycStatus'] ?? profileMap['status'];
+        final normalizedStatus = _normalizeKycStatus(rawStatus?.toString());
+        setState(() {
+          profileData = profileMap;
+          kycStatus = normalizedStatus;
+          final serverName = profileMap['name']?.toString() ?? '';
+          if (!nameInitialized || nameController.text != serverName) {
+            nameController.text = serverName;
+            nameInitialized = true;
+          }
+        });
         } else {
           setState(() {
             profileError = 'Failed to load profile data.';
@@ -521,7 +534,9 @@ class _SettingsState extends State<Settings> {
         final data = response['data'] is Map<String, dynamic>
             ? Map<String, dynamic>.from(response['data'] as Map<String, dynamic>)
             : null;
-        final statusValue = data?['status']?.toString() ?? kycStatus;
+        final rawStatus = data?['status'] ?? data?['kycStatus'];
+        final statusValue =
+            _normalizeKycStatus(rawStatus?.toString() ?? kycStatus);
         if (!mounted) {
           return;
         }
@@ -535,6 +550,27 @@ class _SettingsState extends State<Settings> {
     } catch (_) {
       // ignore errors silently for now
     }
+  }
+
+  String _normalizeKycStatus(String? raw) {
+    if (raw == null) return 'pending';
+    final value = raw.toLowerCase();
+    if (value.contains('approve') ||
+        value.contains('verified') ||
+        value.contains('admin_ver') ||
+        value.contains('pass') ||
+        value.contains('success')) {
+      return 'approved';
+    }
+    if (value.contains('reject') || value.contains('fail')) {
+      return 'rejected';
+    }
+    if (value.contains('pending') ||
+        value.contains('review') ||
+        value.contains('in_review')) {
+      return 'pending';
+    }
+    return value;
   }
 
   Color _kycStatusColor() {
@@ -1000,7 +1036,7 @@ class _SettingsState extends State<Settings> {
       width: MediaQuery.of(context).size.width,
       color: notifire.getBgColor,
       child: DefaultTabController(
-        length: 5,
+        length: 6,
         initialIndex: 0,
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -1021,11 +1057,12 @@ class _SettingsState extends State<Settings> {
                   body: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: TabBarView(children: [
-                      _tabContent(_buildUser(width: constraints.maxWidth)),
-                      _tabContent(_buildReferrals(width: constraints.maxWidth)),
-                      _tabContent(_buildApi(width: constraints.maxWidth)),
-                      _tabContent(_build2SF(width: constraints.maxWidth)),
-                      _tabContent(_buildKycSection()),
+                    _tabContent(_buildUser(width: constraints.maxWidth)),
+                    _tabContent(_buildReferrals(width: constraints.maxWidth)),
+                    _tabContent(_buildApi(width: constraints.maxWidth)),
+                    _tabContent(_build2SF(width: constraints.maxWidth)),
+                    _tabContent(_buildKycSection()),
+                    _tabContent(_buildHelpSection()),
                     ]),
                   ));
             } else {
@@ -1045,6 +1082,7 @@ class _SettingsState extends State<Settings> {
                         _tabContent(_buildApi(width: constraints.maxWidth)),
                         _tabContent(_build2SF(width: constraints.maxWidth)),
                         _tabContent(_buildKycSection()),
+                        _tabContent(_buildHelpSection()),
                       ]),
                     ),
                     const SizedBox(
@@ -1063,6 +1101,9 @@ class _SettingsState extends State<Settings> {
   Widget _tabContent(Widget child) {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 24),
+      physics: const AlwaysScrollableScrollPhysics(),
+      primary: false,
+      dragStartBehavior: DragStartBehavior.down,
       child: Column(
         children: [
           child,
@@ -1611,7 +1652,11 @@ class _SettingsState extends State<Settings> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  _buildReferralCommissionCards(),
+                  const SizedBox(height: 16),
                   _buildReferralShareRow(code),
+                  const SizedBox(height: 16),
+                  _buildReferralAnalyticsCards(),
                   const SizedBox(height: 8),
                   const Divider(),
                   const SizedBox(height: 16),
@@ -1697,6 +1742,127 @@ class _SettingsState extends State<Settings> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildReferralAnalyticsCards() {
+    final metrics = [
+      {'label': 'Click-throughs', 'key': 'clicks'},
+      {'label': 'Conversions', 'key': 'conversions'},
+      {'label': 'Rewards', 'key': 'rewards'},
+    ];
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: metrics.map((metric) {
+        final value = _formatReferralMetric(metric['key']!);
+        return Container(
+          width: 170,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: notifire.getGry700_300Color),
+            color: notifire.getContainerColor,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(metric['label']!,
+                  style: Typographyy.bodySmallMedium
+                      .copyWith(color: notifire.getGry500_600Color)),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: Typographyy.heading6
+                    .copyWith(color: notifire.getTextColor),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Track clicks, conversions, and rewards".tr,
+                style: Typographyy.bodySmallMedium
+                    .copyWith(color: notifire.getGry500_600Color),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _formatReferralMetric(String key) {
+    final value = _referralAnalytics?[key];
+    if (value is num) {
+      if (value == value.roundToDouble()) {
+        return value.toInt().toString();
+      }
+      return value.toStringAsFixed(2);
+    }
+    if (value is String && value.isNotEmpty) {
+      return value;
+    }
+    return '0';
+  }
+
+  Widget _buildReferralCommissionCards() {
+    final entries = [
+      {
+        'title': 'Direct Commission',
+        'detail': 'Earn 5% from friends you refer.',
+        'icon': Icons.link,
+        'color': const Color(0xFF2A6BCB),
+      },
+      {
+        'title': 'Team Build',
+        'detail': 'Get 2% from your network’s transactions.',
+        'icon': Icons.group_add,
+        'color': const Color(0xFF10B981),
+      },
+      {
+        'title': 'Growth Bonus',
+        'detail': 'Tiered rewards for sustained referrals.',
+        'icon': Icons.emoji_events,
+        'color': const Color(0xFFF97316),
+      },
+    ];
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: entries.map((entry) {
+        return Container(
+          width: 220,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: notifire.getContainerColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: notifire.getGry700_300Color),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(entry['icon'] as IconData,
+                      color: entry['color'] as Color),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entry['title'] as String,
+                      style: Typographyy.bodyMediumSemiBold.copyWith(
+                          color: notifire.getTextColor),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                entry['detail'] as String,
+                style: Typographyy.bodySmallMedium
+                    .copyWith(color: notifire.getGry500_600Color),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -2107,6 +2273,29 @@ class _SettingsState extends State<Settings> {
                 style: Typographyy.bodySmallRegular
                     .copyWith(color: notifire.getGry500_600Color),
               ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: notifire.getGry700_300Color),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.admin_panel_settings,
+                        color: priMeryColor, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "KYC approvals go through our admin compliance dashboard; reach out for admin updates if needed.",
+                        style: Typographyy.bodySmallRegular
+                            .copyWith(color: notifire.getGry500_600Color),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -2265,14 +2454,25 @@ class _SettingsState extends State<Settings> {
             border: Border.all(color: notifire.getGry700_300Color),
             color: notifire.getBgColor,
           ),
-          child: Text(
-            value,
-            style: Typographyy.bodyMediumMedium
-                .copyWith(color: notifire.getGry500_600Color),
-          ),
+        child: Text(
+          value,
+          style: Typographyy.bodyMediumMedium
+              .copyWith(color: notifire.getGry500_600Color),
         ),
-      ],
+      ),
+    ],
+  );
+}
+
+  Future<void> _launchSupportEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'support@nirvista.in',
+      queryParameters: {'subject': 'Nirvista Support'},
     );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 
   Widget _buildTabBar() {
@@ -2391,10 +2591,153 @@ class _SettingsState extends State<Settings> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.support_agent,
+                            color: notifire.getTextColor, size: 20),
+                        const SizedBox(width: 8),
+                        Text("Support",
+                            style: Typographyy.bodyMediumMedium
+                                .copyWith(color: notifire.getTextColor)),
+                      ],
+                    ),
+                  ),
                 ]),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHelpSection() {
+    final contactItems = [
+      {'label': 'Email', 'value': 'support@nirvista.in'},
+      {'label': 'Phone', 'value': '97656 53615'},
+    ];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Container(
+            width: 700,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: notifire.getGry700_300Color),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Get Help & Support",
+                  style: Typographyy.heading5
+                      .copyWith(color: notifire.getTextColor),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Need help with KYC, payments, API keys, or approvals? Visit the Get Help hub or connect with support.",
+                  style: Typographyy.bodySmallMedium
+                      .copyWith(color: notifire.getGry500_600Color),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: contactItems
+                      .map(
+                        (item) => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border:
+                                Border.all(color: notifire.getGry700_300Color),
+                            color: notifire.getContainerColor,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "${item['label']}: ",
+                                style: Typographyy.bodySmallSemiBold
+                                    .copyWith(color: notifire.getTextColor),
+                              ),
+                              Text(
+                                item['value']!,
+                                style: Typographyy.bodySmallMedium
+                                    .copyWith(color: priMeryColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/getHelp');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: priMeryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          fixedSize: const Size.fromHeight(48),
+                        ),
+                        child: Text("Open Get Help".tr),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _launchSupportEmail,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: priMeryColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          fixedSize: const Size.fromHeight(48),
+                        ),
+                        child: Text("Email Support".tr),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: notifire.getContainerColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: notifire.getGry700_300Color),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.admin_panel_settings,
+                          color: priMeryColor, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Admin approvals and KYC reviews run through the compliance dashboard; reach out if you need an expedited update.",
+                          style: Typographyy.bodySmallMedium
+                              .copyWith(color: notifire.getGry500_600Color),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2127,7 +2127,7 @@ Future<void> sendMoney({required double width, context}) async {
             subtitle: "Cards / UPI / Wallets",
             icon: Icons.payment,
           ),
-          SizedBox(height: isCompact ? 12 : 16),
+          const SizedBox(height: 12),
           buildMethodCard(
             value: MyWalletsController.topupMethodPayU,
             title: "PayU",

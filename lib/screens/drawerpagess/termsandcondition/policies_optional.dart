@@ -12,7 +12,7 @@ Advanced policies for partners and enterprise use of our travel deals and reward
 - Business accounts can have roles, approval flows, negotiated rates, and reporting. Billing may use cards, wallets, or invoicing where offered; misuse can lead to suspension.
 
 ## 32. Promotional Offers & Coupons Policy
-- Offer terms specify eligibility, stacking rules, excluded fees/taxes, redemption limits, expiry, and geography. Misuse or fraud may void offers and related bookings.
+- Offer terms specify eligibility, staking rules, excluded fees/taxes, redemption limits, expiry, and geography. Misuse or fraud may void offers and related bookings.
 
 ## 33. Loyalty / Rewards Policy
 - Earn/redeem on eligible products; some fares/rates may be excluded. Rewards can expire, are usually non-transferable, and may be clawed back on refunds or fraud. Tiers/benefits may change with notice.

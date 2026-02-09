@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,12 +35,22 @@ class _DashboardState extends State<Dashboard> {
   String _userName = 'User'; // Default username
   final ScrollController _scrollController = ScrollController();
   Timer? _autoRefreshTimer;
+  bool _showEndGraphic = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
     _startAutoRefresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          setState(() {
+            _showEndGraphic = true;
+          });
+        }
+      });
+    });
   }
 
   @override
@@ -71,9 +82,9 @@ class _DashboardState extends State<Dashboard> {
   Future<void> _refreshDashboard() async {
     try {
       await Future.wait([
-        dashBordeController.fetchIcoStages(),
+        dashBordeController.fetchIcoStages(force: true),
         dashBordeController.fetchWalletSummary(),
-        dashBordeController.fetchTransactions(),
+        dashBordeController.fetchTransactions(force: true),
         _loadUserProfile(),
       ]);
     } catch (_) {
@@ -118,7 +129,7 @@ class _DashboardState extends State<Dashboard> {
                           color: notifire.getBgColor,
                           child: _buildDashBordUi2(width: constraints.maxWidth),
                         ),
-                        const DashboardEndGraphic(),
+                        _buildEndGraphicPlaceholder(),
                       ],
                     ),
                   ),
@@ -160,7 +171,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                       ),
-                      const DashboardEndGraphic(),
+                      _buildEndGraphicPlaceholder(),
                     ],
                   ),
                 ),
@@ -199,7 +210,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                       ),
-                      const DashboardEndGraphic(),
+                      _buildEndGraphicPlaceholder(),
                     ],
                   ),
                 ),
@@ -334,28 +345,31 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
         //col2
-        Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: Row(
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: count,
-                      mainAxisExtent: 150,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10),
-                  shrinkWrap: true,
-                  itemCount: walletCards.length,
-                  itemBuilder: (context, index) {
-                    return walletCards[index];
-                  },
+              Padding(
+                padding: const EdgeInsets.only(top: 30),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: dashBordeController.isWalletLoading
+                          ? _buildWalletSkeletonGrid(crossAxisCount: count)
+                          : GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: count,
+                                      mainAxisExtent: 150,
+                                      mainAxisSpacing: 10,
+                                      crossAxisSpacing: 10),
+                              shrinkWrap: true,
+                              itemCount: walletCards.length,
+                              itemBuilder: (context, index) {
+                                return walletCards[index];
+                              },
+                            ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
           child: SizedBox(
@@ -421,14 +435,20 @@ class _DashboardState extends State<Dashboard> {
               )),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 30),
+          padding: const EdgeInsets.only(top: 16),
           child: Row(
             children: [
               Expanded(
                 child: isStageLoading && stageCount == 0
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: LinearProgressIndicator(),
+                    ? Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: LinearProgressIndicator(),
+                          ),
+                          _buildStageSkeletonGrid(
+                              crossAxisCount: count),
+                        ],
                       )
                     : stageError != null && stageCount == 0
                         ? Padding(
@@ -610,7 +630,17 @@ class _DashboardState extends State<Dashboard> {
                                               ),
                                             ]),
                                             if (dashBordeController
-                                                .recentTransactions.isEmpty)
+                                                .isTransactionsLoading)
+                                              ...List.generate(
+                                                3,
+                                                (_) =>
+                                                    _transactionSkeletonRow(
+                                                        context),
+                                              ),
+                                            if (!dashBordeController
+                                                    .isTransactionsLoading &&
+                                                dashBordeController
+                                                    .recentTransactions.isEmpty)
                                               TableRow(children: [
                                                 Padding(
                                                   padding: const EdgeInsets
@@ -630,10 +660,12 @@ class _DashboardState extends State<Dashboard> {
                                                 const SizedBox(),
                                                 const SizedBox(),
                                               ]),
-                                            ...dashBordeController
-                                                .recentTransactions
-                                                .take(6)
-                                                .map((tx) {
+                                            if (!dashBordeController
+                                                .isTransactionsLoading)
+                                              ...dashBordeController
+                                                  .recentTransactions
+                                                  .take(6)
+                                                  .map((tx) {
                                               final status =
                                                   tx['status']?.toString() ??
                                                       '';
@@ -1340,6 +1372,103 @@ class _DashboardState extends State<Dashboard> {
                             .copyWith(color: textcolor))))),
       ),
     ]);
+  }
+
+  Widget _buildEndGraphicPlaceholder() {
+    if (_showEndGraphic) {
+      return const DashboardEndGraphic();
+    }
+    return const SizedBox(height: 140);
+  }
+
+  Widget _buildWalletSkeletonGrid({required int crossAxisCount}) {
+    final crossCount = max(1, crossAxisCount);
+    const placeholderCount = 3;
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossCount,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        mainAxisExtent: 150,
+      ),
+      shrinkWrap: true,
+      itemCount: placeholderCount,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: notifire.getGry700_300Color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStageSkeletonGrid({required int crossAxisCount}) {
+    final crossCount = max(1, crossAxisCount);
+    final itemCount = max(1, crossCount);
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossCount,
+        mainAxisExtent: 140,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+      ),
+      shrinkWrap: true,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: notifire.getGry700_300Color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
+      },
+    );
+  }
+
+
+  TableRow _transactionSkeletonRow(BuildContext context) {
+    final localNotifire =
+        Provider.of<ColorNotifire>(context, listen: true);
+    final baseColor = localNotifire.getGry500_600Color.withOpacity(0.25);
+    return TableRow(children: [
+      Padding(
+        padding: const EdgeInsets.only(top: 10, right: 35),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+      ),
+      _skeletonCell(baseColor, width: 120),
+      _skeletonCell(baseColor, width: 80),
+      _skeletonCell(baseColor, width: 90),
+      _skeletonCell(baseColor, width: 80),
+      _skeletonCell(baseColor, width: 70),
+    ]);
+  }
+
+  Widget _skeletonCell(Color color, {double width = double.infinity}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          width: width,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
   }
 }
 

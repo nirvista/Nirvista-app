@@ -19,11 +19,69 @@ class Transactions extends StatefulWidget {
   State<Transactions> createState() => _TransactionsState();
 }
 
+class _TransactionFilter {
+  final String label;
+  final bool Function(Map<String, dynamic>) matches;
+
+  const _TransactionFilter({
+    required this.label,
+    required this.matches,
+  });
+}
+
 class _TransactionsState extends State<Transactions> {
   final DashBordeController dashBordeController = DashBordeController.shared;
   TransactionController transactionController = Get.put(TransactionController());
   ColorNotifire notifire = ColorNotifire();
   String _searchQuery = '';
+  int _selectedFilterIndex = 0;
+  final List<_TransactionFilter> _transactionFilters = [
+    _TransactionFilter(
+      label: 'All Transactions',
+      matches: (_) => true,
+    ),
+    _TransactionFilter(
+      label: 'Wallet & Token',
+      matches: (tx) {
+        final category = (tx['category']?.toString().toLowerCase() ?? '');
+        return category.contains('wallet') ||
+            category.contains('topup') ||
+            category.contains('deposit') ||
+            category.contains('withdraw') ||
+            category.contains('transfer');
+      },
+    ),
+    _TransactionFilter(
+      label: 'Token Purchases',
+      matches: (tx) {
+        final category = (tx['category']?.toString().toLowerCase() ?? '');
+        final description =
+            (tx['description']?.toString().toLowerCase() ?? '');
+        return category.contains('purchase') ||
+            category.contains('ico') ||
+            description.contains('ico') ||
+            description.contains('token buy');
+      },
+    ),
+    _TransactionFilter(
+      label: 'Referral Earnings',
+      matches: (tx) {
+        final category = (tx['category']?.toString().toLowerCase() ?? '');
+        return category.contains('referral');
+      },
+    ),
+    _TransactionFilter(
+      label: 'Refunds',
+      matches: (tx) {
+        final status = (tx['status']?.toString().toLowerCase() ?? '');
+        final description =
+            (tx['description']?.toString().toLowerCase() ?? '');
+        return status.contains('refund') ||
+            status.contains('reversal') ||
+            description.contains('refund');
+      },
+    ),
+  ];
 
   @override
   void initState() {
@@ -101,6 +159,8 @@ class _TransactionsState extends State<Transactions> {
             ],
           ),
           const SizedBox(height: 20),
+          _buildFilterChips(),
+          const SizedBox(height: 16),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
@@ -132,6 +192,34 @@ class _TransactionsState extends State<Transactions> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFilterChips() {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 6,
+      children: List.generate(_transactionFilters.length, (index) {
+        final filter = _transactionFilters[index];
+        final isSelected = _selectedFilterIndex == index;
+        return ChoiceChip(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          label: Text(filter.label.tr),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                _selectedFilterIndex = index;
+              });
+            }
+          },
+          selectedColor: priMeryColor,
+          backgroundColor: notifire.getContainerColor,
+          labelStyle: Typographyy.bodySmallSemiBold.copyWith(
+            color: isSelected ? Colors.white : notifire.getTextColor,
+          ),
+        );
+      }),
     );
   }
 
@@ -386,13 +474,19 @@ class _TransactionsState extends State<Transactions> {
     );
   }
 
+  bool _matchesSelectedFilter(Map<String, dynamic> tx) {
+    final filter = _transactionFilters[_selectedFilterIndex];
+    return filter.matches(tx);
+  }
+
   List<Map<String, dynamic>> _filteredTransactions(
       List<Map<String, dynamic>> transactions) {
+    final base = transactions.where(_matchesSelectedFilter).toList();
     if (_searchQuery.isEmpty) {
-      return transactions;
+      return base;
     }
     final q = _searchQuery.toLowerCase();
-    return transactions.where((tx) {
+    return base.where((tx) {
       final subtitle = _transactionSubtitle(tx).toLowerCase();
       final id = _transactionId(tx).toLowerCase();
       final rawId = (tx['_id'] ??

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../ConstData/colorprovider.dart';
 import '../ConstData/typography.dart';
+import '../screens/drawerpagess/termsandcondition/policy_detail.dart';
 
 class BottomBarr extends StatefulWidget {
   const BottomBarr({super.key});
@@ -22,8 +23,19 @@ class _BottomBarrState extends State<BottomBarr> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("Privacy Policy".tr,style: Typographyy.bodyMediumMedium.copyWith(color:  notifire.getGry600_500Color)),
-          Text("Copyright 2023".tr,style: Typographyy.bodyMediumMedium.copyWith(color:  notifire.getGry600_500Color)),
+          InkWell(
+            onTap: () => Get.to(
+                () => const PolicyDetailScreen(policyTitle: 'PRIVACY POLICY')),
+            child: Text("Privacy Policy".tr,
+                style: Typographyy.bodyMediumMedium
+                    .copyWith(color: notifire.getGry600_500Color)),
+          ),
+          Text(
+            "© 2026 Nirvista. All rights reserved. Access subject to eligibility"
+                .tr,
+            style: Typographyy.bodyMediumMedium
+                .copyWith(color: notifire.getGry600_500Color),
+          ),
         ],
       ),
     );

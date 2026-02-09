@@ -13,7 +13,7 @@ import '../screens/drawercode.dart';
 import '../screens/drawerpagess/transactions.dart';
 
 class DrawerControllerr extends GetxController implements GetxService {
-  static const int tokenStackingColorIndex = 20;
+  static const int tokenStakingColorIndex = 21;
   int currentIndex = -1;
   int currentcolor = 0;
   RxInt index = 0.obs;
@@ -58,26 +58,27 @@ class DrawerControllerr extends GetxController implements GetxService {
 
   List pageTitle = [
     'Dashboard',
-    'Transaction Details',
-    'Messages',
-    'Your Portfolio',
-    'Buy Token',
+    'Transactions',
+    'Activity',
+    'My Wallets',
+    'Transfer',
+    'Nirvista ICO',
     'Bank Deposit',
     'Sell Token',
     'Sign In',
-    'Sign up',
+    'Sign Up',
     'Authentication',
-    'ForgetPassword',
+    'Forget Password',
     'Reason',
-    'Transaction Details',
+    'Transactions',
     'Recipients',
-    'Performance Analytics',
-    'GetHelp',
+    'Analytics',
+    'Get Help',
     'Settings',
-    'Privacy Pages',
+    'Policy Pages',
     'Bank Details',
-    'Withdraw Funds',
-    'Token Stacking',
+    'Withdrawal',
+    'Token Staking',
   ];
 
   bool isTransfer = false;

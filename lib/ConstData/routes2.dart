@@ -12,7 +12,7 @@ import '../screens/drawerpagess/bank_edit.dart';
 import '../screens/drawerpagess/bank_edit_otp.dart';
 import '../screens/drawerpagess/termsandcondition/policy_detail.dart';
 import '../screens/drawerpagess/withdrawal.dart';
-import 'package:nirvista/screens/drawerpagess/token_stacking.dart';
+import 'package:nirvista/screens/drawerpagess/token_staking.dart';
 
 class Flurorouter {
 
@@ -61,8 +61,8 @@ static final Handler _signUpHandler = Handler(handlerFunc: (context, Map<String,
     );
   },
 );
-  static final Handler _stackingHandler =
-      Handler(handlerFunc: (context, Map<String, dynamic> params) => const TokenStackingPage());
+  static final Handler _stakingHandler =
+      Handler(handlerFunc: (context, Map<String, dynamic> params) => const TokenStakingPage());
 
   static void setupRouter(){
     router.define(
@@ -120,8 +120,8 @@ static final Handler _signUpHandler = Handler(handlerFunc: (context, Map<String,
       transitionType: TransitionType.fadeIn,
     );
     router.define(
-      '/stacking',
-      handler: _stackingHandler,
+      '/staking',
+      handler: _stakingHandler,
       transitionType: TransitionType.fadeIn,
     );
     router.define(

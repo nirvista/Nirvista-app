@@ -230,13 +230,13 @@ class _DrawerCodeState extends State<DrawerCode> {
                           height: 12,
                         ),
                         _buildListTile(
-                          title: "Token Stacking",
+                          title: "Token Staking",
                           icon: "assets/images/wallet.svg",
-                          index: DrawerControllerr.tokenStackingColorIndex,
+                          index: DrawerControllerr.tokenStakingColorIndex,
                           ontap: () {
-                            Navigator.pushNamed(context, '/stacking');
+                            Navigator.pushNamed(context, '/staking');
                             contoller.colorSelecter(
-                                value: DrawerControllerr.tokenStackingColorIndex);
+                                value: DrawerControllerr.tokenStakingColorIndex);
                             contoller.function(value: -1);
                           },
                         ),

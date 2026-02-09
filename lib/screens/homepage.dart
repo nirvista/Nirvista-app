@@ -59,12 +59,42 @@ class _HomePageState extends State<HomePage> {
     'settings': 17,
     'bankEdit': 19,
     'withdrawal': 20,
-    'stacking': DrawerControllerr.tokenStackingColorIndex,
+    'staking': DrawerControllerr.tokenStakingColorIndex,
+  };
+
+  static const Map<String, String> _routeHeaderTitles = {
+    'dashboard': 'Dashboard',
+    'transactions': 'Transactions',
+    'messages': 'Messages',
+    'myWallets': 'My Wallets',
+    'transfer': 'Transfers',
+    'creditCard': 'Nirvista ICO',
+    'bankDeposit': 'Bank Deposit',
+    'sellCrypto': 'Sell Token',
+    'recipients': 'Recipients',
+    'analytics': 'Analytics',
+    'getHelp': 'Get Help',
+    'settings': 'Settings',
+    'bankEdit': 'Bank Details',
+    'withdrawal': 'Withdrawal',
+    'staking': 'Token Staking',
+    'invoices': 'Invoices',
+    'signIn': 'Sign In',
+    'signup': 'Sign Up',
+    'authentication': 'Authentication',
+    'forgetPassword': 'Forgot Password',
+    'reason': 'Reason',
   };
 
   void _syncPageTitleColor() {
     final target = _pageTitleIndex[widget.page] ?? controller.currentcolor;
     controller.colorSelecter(value: target);
+  }
+
+  String _headerTitle(String pageName, DrawerControllerr controller) {
+    return _routeHeaderTitles[pageName] ??
+        controller.pageTitle[controller.currentcolor]?.toString() ??
+        'Dashboard';
   }
 
   Widget _refreshableStack({required Widget child}) {
@@ -75,14 +105,14 @@ class _HomePageState extends State<HomePage> {
           physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  child,
-                  const SizedBox(height: 24),
-                  if (widget.page != 'dashboard') const FooterSection(),
-                ],
-              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    child,
+                    const SizedBox(height: 24),
+                    const FooterSection(),
+                  ],
+                ),
           ),
         );
       }),
@@ -158,9 +188,7 @@ class _HomePageState extends State<HomePage> {
                       Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: Text(
-                            controller.pageTitle[controller.currentcolor]
-                                .toString()
-                                .tr,
+                            _headerTitle(widget.page, controller).tr,
                             style: Typographyy.heading4
                                 .copyWith(color: notifire.getTextColor)),
                       ),
@@ -196,10 +224,7 @@ class _HomePageState extends State<HomePage> {
                               Padding(
                                 padding: const EdgeInsets.all(15.0),
                                 child: Text(
-                                    controller
-                                        .pageTitle[controller.currentcolor]
-                                        .toString()
-                                        .tr,
+                                    _headerTitle(widget.page, controller).tr,
                                     style: Typographyy.heading4.copyWith(
                                         color: notifire.getTextColor)),
                               ),

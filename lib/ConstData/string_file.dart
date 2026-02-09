@@ -4,13 +4,15 @@ class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
     'en_US': {
-      'Sign in to Nirvista': 'Sign in to Nirvista',
-      'Send, spend and save smarter': 'Send, spend and save smarter',
+      'Login into Nirvista ICO': 'Login into Nirvista ICO',
+      'Access Pre-ICO & ICO': 'Access Pre-ICO & ICO',
       'Sign In with Google': 'Sign In with Google',
       'Sign In with Apple': 'Sign In with Apple',
       'Or with email': 'Or with email',
       'Username or email': 'Username or email',
       'Password': 'Password',
+      'Make M Capital': 'Make M Capital',
+      'Enter mobile number': 'Enter mobile number',
       'Send': 'Send',
       'GetHelp': 'GetHelp',
       'Analytics': 'Analytics',
@@ -48,7 +50,8 @@ class AppTranslations extends Translations {
       'Sign In': 'Sign In',
       'Privacy Policy': 'Privacy Policy',
       'Terms & Conditions': 'Terms & Conditions',
-      'Copyright 2023': 'Copyright 2023',
+      '© 2026 Nirvista. All rights reserved. Access subject to eligibility':
+          '© 2026 Nirvista. All rights reserved. Access subject to eligibility',
       'Speady, Easy and Fast': 'Speady, Easy and Fast',
       'Nirvista helps you set saving goals, earn cashback rewards, and get paychecks up to two days early. Get a \$20 bonus when you receive qualifying direct deposits.': 'Nirvista helps you set saving goals, earn cashback rewards, and get paychecks up to two days early. Get a \$20 bonus when you receive qualifying direct deposits.',
       'Sign up for an account': 'Sign up for an account',
@@ -95,6 +98,11 @@ class AppTranslations extends Translations {
       'Electronics Communication Policy.': 'Electronics Communication Policy.',
       'Verify your email': 'Verify your email',
       'We have sent code to your email ': 'We have sent code to your email ',
+      'Verify Your Mobile Number': 'Verify Your Mobile Number',
+      'A code has been sent to verify your registered mobile number.':
+          'A code has been sent to verify your registered mobile number.',
+      'Verify & Continue': 'Verify & Continue',
+      'Resend OTP': 'Resend OTP',
       'alesiaka******@mail.com': 'alesiaka******@mail.com',
       'Resend code in ': 'Resend code in ',
       'Money Flow ': 'Money Flow',

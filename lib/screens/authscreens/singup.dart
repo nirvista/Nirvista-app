@@ -266,7 +266,7 @@ class _SingUpScreenState extends State<SingUpScreen> {
                         height: width < 600 ? 10 : 16,
                       ),
                       Text(
-                        "Send, spend and save smarter".tr,
+                        "Access Pre-ICO & ICO".tr,
                         style: Typographyy.bodyLargeRegular
                             .copyWith(color: notifire.getGry500_600Color),
                       ),
@@ -491,19 +491,32 @@ class _SingUpScreenState extends State<SingUpScreen> {
               SizedBox(
                 height: width < 600 ? 0 : 80,
               ),
-              width < 600
-                  ? const SizedBox()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Privacy Policy".tr,
-                            style: Typographyy.bodyLargeSemiBold
-                                .copyWith(color: notifire.getGry600_500Color)),
-                        Text("Copyright 2023".tr,
-                            style: Typographyy.bodyLargeSemiBold
-                                .copyWith(color: notifire.getGry600_500Color)),
-                      ],
-                    )
+                      width < 600
+                          ? const SizedBox()
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                  onTap: () => Get.to(
+                                    () => const PolicyDetailScreen(
+                                        policyTitle: 'PRIVACY POLICY'),
+                                  ),
+                                  child: Text(
+                                    "Privacy Policy".tr,
+                                    style: Typographyy.bodyLargeSemiBold
+                                        .copyWith(
+                                            color: notifire.getGry600_500Color),
+                                  ),
+                                ),
+                                Text(
+                                  "© 2026 Nirvista. All rights reserved. Access subject to eligibility"
+                                      .tr,
+                                  style: Typographyy.bodyLargeSemiBold
+                                      .copyWith(
+                                          color: notifire.getGry600_500Color),
+                                ),
+                              ],
+                            )
             ],
           ),
         ),

@@ -4,6 +4,34 @@ import 'package:get/get.dart';
 import '../core/storage.dart';
 import '../services/auth_api_service.dart';
 
+class _StageDateOverride {
+  final RegExp match;
+  final String start;
+  final String end;
+  final bool forceInactive;
+
+  const _StageDateOverride(
+    this.match,
+    this.start,
+    this.end, {
+    this.forceInactive = false,
+  });
+}
+
+final List<_StageDateOverride> _stageDateOverrides = [
+  _StageDateOverride(
+    RegExp(r'pre[- ]?ico', caseSensitive: false),
+    '2026-02-01T00:00:00Z',
+    '2026-04-30T23:59:59Z',
+  ),
+  _StageDateOverride(
+    RegExp(r'\bico\b', caseSensitive: false),
+    '2026-05-01T00:00:00Z',
+    '2026-08-01T23:59:59Z',
+    forceInactive: true,
+  ),
+];
+
 class DashBordeController extends GetxController implements GetxService {
   int iteamcount = 4;
   int coinselecter = 0;
@@ -87,7 +115,7 @@ class DashBordeController extends GetxController implements GetxService {
     }
   }
 
-  Future<void> fetchIcoStages() async {
+  Future<void> fetchIcoStages({bool force = false}) async {
     isStageLoading = true;
     stageError = null;
     update();
@@ -111,6 +139,9 @@ class DashBordeController extends GetxController implements GetxService {
                   .map((item) => Map<String, dynamic>.from(item))
                   .toList()
               : [];
+          if (stages.isNotEmpty) {
+            _applyStageDateOverrides(stages);
+          }
           activeStageKey = activeStage is Map<String, dynamic>
               ? activeStage['key']?.toString()
               : null;
@@ -251,7 +282,7 @@ class DashBordeController extends GetxController implements GetxService {
     return combined;
   }
 
-  Future<void> fetchTransactions() async {
+  Future<void> fetchTransactions({bool force = false}) async {
     isTransactionsLoading = true;
     transactionsError = null;
     update();
@@ -296,6 +327,77 @@ class DashBordeController extends GetxController implements GetxService {
     } finally {
       isTransactionsLoading = false;
       update();
+    }
+  }
+
+  void _applyStageDateOverrides(List<Map<String, dynamic>> stageList) {
+    final nowUtc = DateTime.now().toUtc();
+    for (final stage in stageList) {
+      final label =
+          (stage['label'] ?? stage['key'] ?? '').toString().toLowerCase();
+      final override = _matchingStageOverride(label);
+      if (override != null) {
+        stage['startAt'] = override.start;
+        stage['endAt'] = override.end;
+      }
+      _recalculateStageFlags(stage, nowUtc);
+      if (override?.forceInactive == true) {
+        stage['isActive'] = false;
+        stage['isUpcoming'] = false;
+        stage['isEnded'] = false;
+        stage['status'] = 'inactive';
+      }
+    }
+  }
+
+  _StageDateOverride? _matchingStageOverride(String label) {
+    for (final override in _stageDateOverrides) {
+      if (override.match.hasMatch(label)) {
+        return override;
+      }
+    }
+    return null;
+  }
+
+  void _recalculateStageFlags(Map<String, dynamic> stage, DateTime nowUtc) {
+    final start = DateTime.tryParse(stage['startAt']?.toString() ?? '');
+    final end = DateTime.tryParse(stage['endAt']?.toString() ?? '');
+    var isActive = false;
+    var isUpcoming = false;
+    var isEnded = false;
+
+    if (start != null && end != null) {
+      if (nowUtc.isBefore(start)) {
+        isUpcoming = true;
+      } else if (nowUtc.isAfter(end)) {
+        isEnded = true;
+      } else {
+        isActive = true;
+      }
+    } else if (start != null) {
+      if (nowUtc.isBefore(start)) {
+        isUpcoming = true;
+      } else {
+        isActive = true;
+      }
+    } else if (end != null) {
+      if (nowUtc.isAfter(end)) {
+        isEnded = true;
+      }
+    }
+
+    stage['isActive'] = isActive;
+    stage['isUpcoming'] = isUpcoming;
+    stage['isEnded'] = isEnded;
+
+    if (stage['status'] == null || stage['status'].toString().isEmpty) {
+      stage['status'] = isActive
+          ? 'active'
+          : isUpcoming
+              ? 'upcoming'
+              : isEnded
+                  ? 'ended'
+                  : '';
     }
   }
 
