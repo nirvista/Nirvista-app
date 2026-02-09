@@ -8,14 +8,8 @@ class _StageDateOverride {
   final RegExp match;
   final String start;
   final String end;
-  final bool forceInactive;
 
-  const _StageDateOverride(
-    this.match,
-    this.start,
-    this.end, {
-    this.forceInactive = false,
-  });
+  _StageDateOverride(this.match, this.start, this.end);
 }
 
 final List<_StageDateOverride> _stageDateOverrides = [
@@ -28,7 +22,6 @@ final List<_StageDateOverride> _stageDateOverrides = [
     RegExp(r'\bico\b', caseSensitive: false),
     '2026-05-01T00:00:00Z',
     '2026-08-01T23:59:59Z',
-    forceInactive: true,
   ),
 ];
 
@@ -51,6 +44,10 @@ class DashBordeController extends GetxController implements GetxService {
   double? tokenWalletBalance;
   String tokenSymbol = 'NVT';
   double? referralWalletBalance;
+  bool isReferralLoading = false;
+  String? referralError;
+  String? referralLink;
+  String? referralCode;
   List<Map<String, dynamic>> allTransactions = [];
   bool isTransactionsLoading = false;
   String? transactionsError;
@@ -61,36 +58,37 @@ class DashBordeController extends GetxController implements GetxService {
     super.onInit();
     _loadCachedWalletSummary();
     fetchIcoStages();
+    fetchReferralDetails();
     fetchWalletSummary();
     fetchTransactions();
   }
 
-
-  setistextishide(bool value){
+  setistextishide(bool value) {
     istextishide = value;
     update();
   }
 
-  ismenu(bool value){
-  ismenuopen = value;
-  update();
-}
-  ismenu1(bool value){
+  ismenu(bool value) {
+    ismenuopen = value;
+    update();
+  }
+
+  ismenu1(bool value) {
     ismenuopen1 = value;
     update();
   }
 
-  selectcoin(int value){
+  selectcoin(int value) {
     coinselecter = value;
     update();
   }
 
-  selectcoin1(int value){
+  selectcoin1(int value) {
     coinselecter1 = value;
     update();
   }
 
-  setiteamcount(int value){
+  setiteamcount(int value) {
     iteamcount = value;
     update();
   }
@@ -159,6 +157,49 @@ class DashBordeController extends GetxController implements GetxService {
       stages = [];
     } finally {
       isStageLoading = false;
+      update();
+    }
+  }
+
+  Future<void> fetchReferralDetails({bool force = false}) async {
+    if (isReferralLoading && !force) return;
+    isReferralLoading = true;
+    referralError = null;
+    update();
+
+    try {
+      final response = await AuthApiService.getReferralCode();
+      if (response['success'] == true) {
+        Map<String, dynamic>? payload;
+        if (response['data'] is Map<String, dynamic>) {
+          payload = response['data'] as Map<String, dynamic>;
+        } else if (response['link'] != null ||
+            response['referralCode'] != null) {
+          payload = response;
+        }
+
+        if (payload != null) {
+          final link = payload['link'] ??
+              payload['referralLink'] ??
+              payload['url'] ??
+              payload['referralUrl'];
+          final code = payload['code'] ??
+              payload['referralCode'] ??
+              payload['referral'] ??
+              payload['referral_code'];
+          referralLink = link?.toString();
+          referralCode = code?.toString();
+        } else {
+          referralError = 'Referral data is unavailable.';
+        }
+      } else {
+        referralError = response['message']?.toString() ??
+            'Failed to load referral details.';
+      }
+    } catch (_) {
+      referralError = 'Failed to load referral details.';
+    } finally {
+      isReferralLoading = false;
       update();
     }
   }
@@ -256,9 +297,8 @@ class DashBordeController extends GetxController implements GetxService {
       'amount': (tx['fiatAmount'] ?? tx['amount']) is num
           ? (tx['fiatAmount'] ?? tx['amount'] as num).toDouble()
           : null,
-      'currency': tx['currency']?.toString() ??
-          tx['fiatCurrency']?.toString() ??
-          'INR',
+      'currency':
+          tx['currency']?.toString() ?? tx['fiatCurrency']?.toString() ?? 'INR',
       'category': 'purchase',
       'description': tx['description']?.toString(),
       'paymentGateway': tx['paymentGateway']?.toString(),
@@ -268,8 +308,7 @@ class DashBordeController extends GetxController implements GetxService {
   }
 
   List<Map<String, dynamic>> _sortedCombined(
-      List<Map<String, dynamic>> walletTx,
-      List<Map<String, dynamic>> icoTx) {
+      List<Map<String, dynamic>> walletTx, List<Map<String, dynamic>> icoTx) {
     final combined = <Map<String, dynamic>>[
       ...walletTx.map((e) => _normalizeWalletTx(e)),
       ...icoTx.map((e) => _normalizeIcoTx(e)),
@@ -294,19 +333,19 @@ class DashBordeController extends GetxController implements GetxService {
       final walletList = (walletRes['data']?['transactions'] ??
               walletRes['transactions'] ??
               walletRes['data']) is List
-          ? List<Map<String, dynamic>>.from(
-              (walletRes['data']?['transactions'] ??
-                      walletRes['transactions'] ??
-                      walletRes['data'])
-                  .whereType<Map>())
+          ? List<Map<String, dynamic>>.from((walletRes['data']
+                      ?['transactions'] ??
+                  walletRes['transactions'] ??
+                  walletRes['data'])
+              .whereType<Map>())
           : <Map<String, dynamic>>[];
 
-      final icoList = (icoRes['data'] ?? icoRes['transactions'] ?? icoRes)
-              is List
-          ? List<Map<String, dynamic>>.from(
-              (icoRes['data'] ?? icoRes['transactions'] ?? icoRes)
-                  .whereType<Map>())
-          : <Map<String, dynamic>>[];
+      final icoList =
+          (icoRes['data'] ?? icoRes['transactions'] ?? icoRes) is List
+              ? List<Map<String, dynamic>>.from(
+                  (icoRes['data'] ?? icoRes['transactions'] ?? icoRes)
+                      .whereType<Map>())
+              : <Map<String, dynamic>>[];
 
       final walletSuccess = walletRes['success'] != false;
       final icoSuccess = icoRes['success'] != false;
@@ -341,12 +380,6 @@ class DashBordeController extends GetxController implements GetxService {
         stage['endAt'] = override.end;
       }
       _recalculateStageFlags(stage, nowUtc);
-      if (override?.forceInactive == true) {
-        stage['isActive'] = false;
-        stage['isUpcoming'] = false;
-        stage['isEnded'] = false;
-        stage['status'] = 'inactive';
-      }
     }
   }
 
@@ -466,7 +499,5 @@ class DashBordeController extends GetxController implements GetxService {
     "Eth",
     "Pol",
     "Trx",
-
   ];
-
 }

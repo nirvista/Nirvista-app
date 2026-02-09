@@ -4,10 +4,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../CommonWidgets/card.dart';
 import '../../CommonWidgets/columcard.dart';
 import '../../CommonWidgets/stage_card.dart';
@@ -18,6 +20,7 @@ import '../../ConstData/typography.dart';
 import '../../controller/dashbordecontroller.dart';
 import '../../controller/drawercontroller.dart';
 import '../../services/auth_api_service.dart';
+import '../../utils/referral_helper.dart';
 import 'my_wallets.dart' show sendMoney;
 
 class Dashboard extends StatefulWidget {
@@ -35,22 +38,12 @@ class _DashboardState extends State<Dashboard> {
   String _userName = 'User'; // Default username
   final ScrollController _scrollController = ScrollController();
   Timer? _autoRefreshTimer;
-  bool _showEndGraphic = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
     _startAutoRefresh();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          setState(() {
-            _showEndGraphic = true;
-          });
-        }
-      });
-    });
   }
 
   @override
@@ -84,12 +77,33 @@ class _DashboardState extends State<Dashboard> {
       await Future.wait([
         dashBordeController.fetchIcoStages(force: true),
         dashBordeController.fetchWalletSummary(),
+        dashBordeController.fetchReferralDetails(force: true),
         dashBordeController.fetchTransactions(force: true),
         _loadUserProfile(),
       ]);
     } catch (_) {
       // Swallow errors to keep indicators stable.
     }
+  }
+
+  void _copyReferralLink(BuildContext context, String value) {
+    Clipboard.setData(ClipboardData(text: value));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Referral link copied".tr),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _shareReferralLink(String value) {
+    Share.share('Create an account using this link for Nirvista: $value');
+  }
+
+  String? _referralShareValue() {
+    final candidate =
+        dashBordeController.referralLink ?? dashBordeController.referralCode;
+    return formatReferralShareValue(candidate);
   }
 
   void _startAutoRefresh() {
@@ -129,7 +143,7 @@ class _DashboardState extends State<Dashboard> {
                           color: notifire.getBgColor,
                           child: _buildDashBordUi2(width: constraints.maxWidth),
                         ),
-                        _buildEndGraphicPlaceholder(),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
@@ -171,7 +185,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                       ),
-                      _buildEndGraphicPlaceholder(),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
@@ -210,7 +224,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                       ),
-                      _buildEndGraphicPlaceholder(),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
@@ -220,6 +234,108 @@ class _DashboardState extends State<Dashboard> {
         ),
       );
     });
+  }
+
+  Widget _buildReferralCard() {
+    final isLoading = dashBordeController.isReferralLoading;
+    final error = dashBordeController.referralError;
+    final shareValue = _referralShareValue();
+    final displayValue = shareValue ??
+        dashBordeController.referralLink ??
+        dashBordeController.referralCode ??
+        "Referral details coming soon";
+    final code = dashBordeController.referralCode ?? 'N/A';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: notifire.getGry700_300Color),
+        color: notifire.getContainerColor,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.share, color: priMeryColor),
+              const SizedBox(width: 10),
+              Text(
+                "Invite friends to Nirvista",
+                style:
+                    Typographyy.heading6.copyWith(color: notifire.getTextColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "Share your link to earn rewards on every new sign-up.",
+            style: Typographyy.bodyMediumMedium
+                .copyWith(color: notifire.getGry500_600Color),
+          ),
+          const SizedBox(height: 12),
+          if (isLoading) ...[
+            const LinearProgressIndicator(),
+            const SizedBox(height: 12),
+          ],
+          SelectableText(
+            displayValue,
+            style: Typographyy.bodySmallMedium
+                .copyWith(color: priMeryColor, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: shareValue != null
+                          ? () => _copyReferralLink(context, shareValue)
+                          : null,
+                      icon: const Icon(Icons.copy, size: 18),
+                      label: Text(
+                        "Copy link".tr,
+                        style: Typographyy.bodyMediumSemiBold
+                            .copyWith(color: priMeryColor),
+                      ),
+                    ),
+                  ),
+                  if (shareValue != null) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _shareReferralLink(shareValue),
+                        icon: const Icon(Icons.share, size: 18),
+                        label: Text(
+                          "Share referral link".tr,
+                          style: Typographyy.bodyMediumSemiBold
+                              .copyWith(color: whiteColor),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: priMeryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Referral code: $code',
+            style: Typographyy.bodySmallMedium
+                .copyWith(color: notifire.getGry500_600Color),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: Typographyy.bodySmallMedium
+                  .copyWith(color: Colors.red.shade600),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   PopupMenuItem coinselecter({required bool i1or2}) {
@@ -345,31 +461,30 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
         //col2
-              Padding(
-                padding: const EdgeInsets.only(top: 30),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: dashBordeController.isWalletLoading
-                          ? _buildWalletSkeletonGrid(crossAxisCount: count)
-                          : GridView.builder(
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: count,
-                                      mainAxisExtent: 150,
-                                      mainAxisSpacing: 10,
-                                      crossAxisSpacing: 10),
-                              shrinkWrap: true,
-                              itemCount: walletCards.length,
-                              itemBuilder: (context, index) {
-                                return walletCards[index];
-                              },
-                            ),
-                    ),
-                  ],
-                ),
+        Padding(
+          padding: const EdgeInsets.only(top: 30),
+          child: Row(
+            children: [
+              Expanded(
+                child: dashBordeController.isWalletLoading
+                    ? _buildWalletSkeletonGrid(crossAxisCount: count)
+                    : GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: count,
+                            mainAxisExtent: 150,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10),
+                        shrinkWrap: true,
+                        itemCount: walletCards.length,
+                        itemBuilder: (context, index) {
+                          return walletCards[index];
+                        },
+                      ),
               ),
+            ],
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
           child: SizedBox(
@@ -446,8 +561,7 @@ class _DashboardState extends State<Dashboard> {
                             padding: EdgeInsets.symmetric(vertical: 12),
                             child: LinearProgressIndicator(),
                           ),
-                          _buildStageSkeletonGrid(
-                              crossAxisCount: count),
+                          _buildStageSkeletonGrid(crossAxisCount: count),
                         ],
                       )
                     : stageError != null && stageCount == 0
@@ -633,9 +747,8 @@ class _DashboardState extends State<Dashboard> {
                                                 .isTransactionsLoading)
                                               ...List.generate(
                                                 3,
-                                                (_) =>
-                                                    _transactionSkeletonRow(
-                                                        context),
+                                                (_) => _transactionSkeletonRow(
+                                                    context),
                                               ),
                                             if (!dashBordeController
                                                     .isTransactionsLoading &&
@@ -666,26 +779,26 @@ class _DashboardState extends State<Dashboard> {
                                                   .recentTransactions
                                                   .take(6)
                                                   .map((tx) {
-                                              final status =
-                                                  tx['status']?.toString() ??
-                                                      '';
-                                              final color =
-                                                  _statusColor(status);
-                                              return tableroww(
-                                                logo: _transactionLogo(tx),
-                                                price: _transactionTitle(tx),
-                                                subtitle:
-                                                    _transactionSubtitle(tx),
-                                                id: _transactionId(tx),
-                                                date: _formatDate(
-                                                    tx['createdAt']
-                                                        ?.toString()),
-                                                status: _statusLabel(status),
-                                                fees: _transactionGateway(tx),
-                                                color: color,
-                                                context: context,
-                                              );
-                                            }),
+                                                final status =
+                                                    tx['status']?.toString() ??
+                                                        '';
+                                                final color =
+                                                    _statusColor(status);
+                                                return tableroww(
+                                                  logo: _transactionLogo(tx),
+                                                  price: _transactionTitle(tx),
+                                                  subtitle:
+                                                      _transactionSubtitle(tx),
+                                                  id: _transactionId(tx),
+                                                  date: _formatDate(
+                                                      tx['createdAt']
+                                                          ?.toString()),
+                                                  status: _statusLabel(status),
+                                                  fees: _transactionGateway(tx),
+                                                  color: color,
+                                                  context: context,
+                                                );
+                                              }),
 
                                             // row(
                                             //     title: "Sent to Antonio",
@@ -942,6 +1055,8 @@ class _DashboardState extends State<Dashboard> {
             ]),
           ),
         ),
+        _buildReferralCard(),
+        const SizedBox(height: 24),
         Container(
           margin: const EdgeInsets.only(top: 30),
           decoration: BoxDecoration(
@@ -1374,13 +1489,6 @@ class _DashboardState extends State<Dashboard> {
     ]);
   }
 
-  Widget _buildEndGraphicPlaceholder() {
-    if (_showEndGraphic) {
-      return const DashboardEndGraphic();
-    }
-    return const SizedBox(height: 140);
-  }
-
   Widget _buildWalletSkeletonGrid({required int crossAxisCount}) {
     final crossCount = max(1, crossAxisCount);
     const placeholderCount = 3;
@@ -1429,10 +1537,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-
   TableRow _transactionSkeletonRow(BuildContext context) {
-    final localNotifire =
-        Provider.of<ColorNotifire>(context, listen: true);
+    final localNotifire = Provider.of<ColorNotifire>(context, listen: true);
     final baseColor = localNotifire.getGry500_600Color.withOpacity(0.25);
     return TableRow(children: [
       Padding(
@@ -1546,45 +1652,6 @@ TableRow tableroww(
       )),
     ),
   ]);
-}
-
-class DashboardEndGraphic extends StatelessWidget {
-  const DashboardEndGraphic({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final notifire = Provider.of<ColorNotifire>(context, listen: true);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: notifire.getGry700_300Color),
-            ),
-            child: CircleAvatar(
-              radius: 38,
-              backgroundColor: Colors.transparent,
-              backgroundImage:
-                  const AssetImage('assets/images/03.png'),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Made with ❤️ by Nirvista',
-            style: Typographyy.bodySmallMedium.copyWith(
-              color: notifire.getTextColor.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 Widget buildiconandtitle({required String title, context}) {

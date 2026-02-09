@@ -28,6 +28,18 @@ class StageCard extends StatelessWidget {
     required this.isHighlight,
   });
 
+  String? _stageTag() {
+    if (isActive) return 'Current Stage';
+    if (isUpcoming) return 'Upcoming Stage';
+    return null;
+  }
+
+  Color _stageTagColor() {
+    if (isActive) return priMeryColor;
+    if (isUpcoming) return Colors.orange;
+    return Colors.grey;
+  }
+
   String _formatDate(String? iso) {
     if (iso == null || iso.isEmpty) {
       return 'Not Released';
@@ -92,6 +104,8 @@ class StageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifire = Provider.of<ColorNotifire>(context, listen: true);
     final statusColor = _statusColor();
+    final stageTag = _stageTag();
+    final stageTagColor = _stageTagColor();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -120,8 +134,7 @@ class StageCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   color: statusColor.withValues(alpha: 0.15),
@@ -129,7 +142,8 @@ class StageCard extends StatelessWidget {
                 ),
                 child: Text(
                   _statusLabel(),
-                  style: Typographyy.bodySmallRegular.copyWith(color: statusColor),
+                  style:
+                      Typographyy.bodySmallRegular.copyWith(color: statusColor),
                 ),
               ),
             ],
@@ -146,12 +160,13 @@ class StageCard extends StatelessWidget {
             style: Typographyy.bodySmallRegular
                 .copyWith(color: notifire.getGry500_600Color),
           ),
-          if (isHighlight) ...[
+          if (stageTag != null) ...[
             const SizedBox(height: 6),
             Text(
-              'Current Stage',
-              style: Typographyy.bodySmallMedium
-                  .copyWith(color: priMeryColor),
+              stageTag,
+              style: Typographyy.bodySmallMedium.copyWith(
+                color: stageTagColor,
+              ),
             ),
           ]
         ],

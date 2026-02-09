@@ -16,6 +16,7 @@ import '../../ConstData/typography.dart';
 import '../../controller/dashbordecontroller.dart';
 import '../../controller/drawercontroller.dart';
 import '../../services/auth_api_service.dart';
+import '../../utils/referral_helper.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -58,8 +59,6 @@ class _SettingsState extends State<Settings> {
   String? _referralLink;
   String? _referralCode;
   Map<String, dynamic>? _referralAnalytics;
-
-  static const String _referralBaseUrl = 'https://register.nirvista.io';
 
   @override
   void initState() {
@@ -285,9 +284,7 @@ class _SettingsState extends State<Settings> {
     final shareCandidate =
         (code?.trim().isNotEmpty ?? false) ? code!.trim() : null;
     final rawShareValue = linkValue ?? shareCandidate;
-    final shareValue = rawShareValue == null
-        ? null
-        : _formatReferralSharingValue(rawShareValue);
+    final shareValue = formatReferralShareValue(rawShareValue);
     final openLinkValue = shareValue != null &&
             shareValue.startsWith(RegExp(r'https?://', caseSensitive: false))
         ? shareValue
@@ -376,9 +373,11 @@ class _SettingsState extends State<Settings> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       icon: const Icon(Icons.share, size: 18),
-                      label: Text("Share link".tr,
-                          style: Typographyy.bodyMediumSemiBold
-                              .copyWith(color: notifire.getTextColor)),
+                      label: Text(
+                        "Share referral link".tr,
+                        style: Typographyy.bodyMediumSemiBold
+                            .copyWith(color: notifire.getTextColor),
+                      ),
                     ),
                   ),
                 ],
@@ -414,21 +413,6 @@ class _SettingsState extends State<Settings> {
     final parsed = DateTime.tryParse(date);
     if (parsed == null) return date;
     return "${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}";
-  }
-
-  String _formatReferralSharingValue(String value) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return trimmed;
-    final protocolRegex = RegExp(r'https?://', caseSensitive: false);
-    if (protocolRegex.hasMatch(trimmed)) {
-      return trimmed;
-    }
-    final lower = trimmed.toLowerCase();
-    if (lower.startsWith('register.nirvista.io')) {
-      return 'https://$trimmed';
-    }
-    final sanitized = trimmed.replaceAll(RegExp(r'^/+'), '');
-    return '$_referralBaseUrl/$sanitized';
   }
 
   @override

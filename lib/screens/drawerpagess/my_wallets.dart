@@ -1957,8 +1957,7 @@ Future<void> addCurrency({required double width, context}) async {
       });
     },
   );
-  return dialogFuture
-      .whenComplete(controller.clearTopupOverlayContext);
+  return dialogFuture.whenComplete(controller.clearTopupOverlayContext);
 }
 
 Future<void> sendMoney({required double width, context}) async {
@@ -1978,7 +1977,7 @@ Future<void> sendMoney({required double width, context}) async {
       required int value,
       required String title,
       required String subtitle,
-      required IconData icon,
+      required Widget logo,
     }) {
       final isSelected = myWalletsController.selectedTopupMethod == value;
       return InkWell(
@@ -1998,15 +1997,16 @@ Future<void> sendMoney({required double width, context}) async {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor:
-                    isSelected ? priMeryColor : notifire.getGry700_300Color,
-                child: Icon(
-                  icon,
-                  color: isSelected ? Colors.white : notifire.getTextColor,
-                  size: 20,
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      isSelected ? priMeryColor : notifire.getGry700_300Color,
                 ),
+                padding: const EdgeInsets.all(6),
+                child: Center(child: logo),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -2125,14 +2125,24 @@ Future<void> sendMoney({required double width, context}) async {
             value: MyWalletsController.topupMethodRazorpay,
             title: "Razorpay",
             subtitle: "Cards / UPI / Wallets",
-            icon: Icons.payment,
+            logo: Image.network(
+              'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Razorpay_logo.png/600px-Razorpay_logo.png',
+              width: 28,
+              height: 28,
+              fit: BoxFit.contain,
+            ),
           ),
           const SizedBox(height: 12),
           buildMethodCard(
             value: MyWalletsController.topupMethodPayU,
             title: "PayU",
             subtitle: "Cards, UPI & wallets via PayU",
-            icon: Icons.account_balance_wallet,
+            logo: Image.network(
+              'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/PayU_Logo.svg/512px-PayU_Logo.svg.png',
+              width: 28,
+              height: 28,
+              fit: BoxFit.contain,
+            ),
           ),
           SizedBox(height: isCompact ? 16 : 24),
           TextField(
@@ -2324,7 +2334,7 @@ Future<void> sendMoney({required double width, context}) async {
                     required int value,
                     required String title,
                     required String subtitle,
-                    required IconData icon,
+                    required Widget logo,
                   }) {
                     final isSelected =
                         myWalletsController.selectedTopupMethod == value;
@@ -2347,18 +2357,17 @@ Future<void> sendMoney({required double width, context}) async {
                         ),
                         child: Row(
                           children: [
-                            CircleAvatar(
-                              radius: 22,
-                              backgroundColor: isSelected
-                                  ? priMeryColor
-                                  : notifire.getGry700_300Color,
-                              child: Icon(
-                                icon,
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
                                 color: isSelected
-                                    ? Colors.white
-                                    : notifire.getTextColor,
-                                size: 20,
+                                    ? priMeryColor
+                                    : notifire.getGry700_300Color,
                               ),
+                              padding: const EdgeInsets.all(6),
+                              child: Center(child: logo),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -2479,17 +2488,28 @@ Future<void> sendMoney({required double width, context}) async {
                                 ),
                                 const SizedBox(height: 16),
                                 buildMethodCard(
-                                  value: MyWalletsController.topupMethodRazorpay,
+                                  value:
+                                      MyWalletsController.topupMethodRazorpay,
                                   title: "Razorpay",
                                   subtitle: "Cards / UPI / Wallets",
-                                  icon: Icons.payment,
+                                  logo: Image.network(
+                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Razorpay_logo.png/600px-Razorpay_logo.png',
+                                    width: 28,
+                                    height: 28,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
                                 const SizedBox(height: 12),
                                 buildMethodCard(
                                   value: MyWalletsController.topupMethodPayU,
                                   title: "PayU",
                                   subtitle: "Cards, UPI & wallets via PayU",
-                                  icon: Icons.account_balance_wallet,
+                                  logo: Image.network(
+                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/PayU_Logo.svg/512px-PayU_Logo.svg.png',
+                                    width: 28,
+                                    height: 28,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
                                 const SizedBox(height: 24),
                                 TextField(
@@ -2621,8 +2641,7 @@ Future<void> sendMoney({required double width, context}) async {
         );
       },
     );
-    return bottomSheetFuture
-        .whenComplete(controller.clearTopupOverlayContext);
+    return bottomSheetFuture.whenComplete(controller.clearTopupOverlayContext);
   }
 
   final dialogFuture = showDialog<void>(
